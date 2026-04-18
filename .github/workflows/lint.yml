@@ -1,0 +1,41 @@
+---
+env:
+  PRE_COMMIT_VERSION: '4.5.1'
+  PYTHON_VERSION: '3.14.4'
+jobs:
+  lint:
+    env:
+      CONFIG_PATH: 'cfg/pre-commit-lint.yml'
+    name: 'Lint'
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: 'actions/checkout@v6'
+    - uses: 'actions/setup-python@v6'
+      with:
+        cache: 'pip'
+        cache-dependency-path: '.github/workflows/lint/requirements.txt'
+        python-version: '${{ env.PYTHON_VERSION }}'
+    - run: 'pip install -r .github/workflows/lint/requirements.txt'
+    - id: 'pre-commit-cache'
+      uses: 'actions/cache/restore@v5'
+      with:
+        key: 'pre-commit-lint-${{ runner.os }}-${{ runner.arch }}-python-${{
+              env.PYTHON_VERSION }}-pre-commit-${{ env.PRE_COMMIT_VERSION
+              }}-${{ hashFiles(env.CONFIG_PATH) }}'
+        path: '~/.cache/pre-commit'
+    - run: 'pre-commit install-hooks -c ${{ env.CONFIG_PATH }}'
+    - run: >-
+        pre-commit run --all-files --color=always --show-diff-on-failure
+        --config ${{ env.CONFIG_PATH }}
+    - if: |
+        always() && steps.pre-commit-cache.outputs.cache-hit != 'true'
+      uses: 'actions/cache/save@v5'
+      with:
+        key: 'pre-commit-lint-${{ runner.os }}-${{ runner.arch }}-python-${{
+              env.PYTHON_VERSION }}-pre-commit-${{ env.PRE_COMMIT_VERSION
+              }}-${{ hashFiles(env.CONFIG_PATH) }}'
+        path: '~/.cache/pre-commit'
+name: 'Lint'
+'on':
+  pull_request: null
+...

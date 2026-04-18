@@ -1,0 +1,27 @@
+# cspell:word amannn
+---
+jobs:
+  semantic-pr:
+    name: 'Semantic PR'
+    runs-on: 'ubuntu-latest'
+    steps:
+    - env:
+        GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+      uses: 'amannn/action-semantic-pull-request@v6'
+      with:
+        requireScope: true
+        scopes: '^ENG-[0-9]+$'
+        subjectPattern: '^[A-Z].*$'
+        validateSingleCommit: true
+        validateSingleCommitMatchesPrTitle: true
+name: 'Semantic PR'
+'on':
+  pull_request:
+    types:
+    - 'edited'
+    - 'opened'
+    - 'reopened'
+    - 'synchronize'
+permissions:
+  pull-requests: 'read'
+...
