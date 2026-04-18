@@ -1,6 +1,6 @@
 ---
 env:
-  NODE_VERSION: '22.18.0'
+  NODE_VERSION: '25'
   PRE_COMMIT_VERSION: '4.5.1'
   PYTHON_VERSION: '3.14.4'
 jobs:
