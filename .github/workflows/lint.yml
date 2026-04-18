@@ -1,5 +1,6 @@
 ---
 env:
+  NODE_VERSION: '22.18.0'
   PRE_COMMIT_VERSION: '4.5.1'
   PYTHON_VERSION: '3.14.4'
 jobs:
@@ -10,6 +11,9 @@ jobs:
     runs-on: 'ubuntu-latest'
     steps:
     - uses: 'actions/checkout@v6'
+    - uses: 'actions/setup-node@v6'
+      with:
+        node-version: '${{ env.NODE_VERSION }}'
     - uses: 'actions/setup-python@v6'
       with:
         cache: 'pip'
@@ -19,9 +23,10 @@ jobs:
     - id: 'pre-commit-cache'
       uses: 'actions/cache/restore@v5'
       with:
-        key: 'pre-commit-lint-${{ runner.os }}-${{ runner.arch }}-python-${{
-              env.PYTHON_VERSION }}-pre-commit-${{ env.PRE_COMMIT_VERSION
-              }}-${{ hashFiles(env.CONFIG_PATH) }}'
+        key: 'pre-commit-lint-${{ runner.os }}-${{ runner.arch }}-node-${{
+              env.NODE_VERSION }}-python-${{ env.PYTHON_VERSION
+              }}-pre-commit-${{ env.PRE_COMMIT_VERSION }}-${{
+              hashFiles(env.CONFIG_PATH) }}'
         path: '~/.cache/pre-commit'
     - run: 'pre-commit install-hooks -c ${{ env.CONFIG_PATH }}'
     - run: >-
@@ -31,9 +36,10 @@ jobs:
         always() && steps.pre-commit-cache.outputs.cache-hit != 'true'
       uses: 'actions/cache/save@v5'
       with:
-        key: 'pre-commit-lint-${{ runner.os }}-${{ runner.arch }}-python-${{
-              env.PYTHON_VERSION }}-pre-commit-${{ env.PRE_COMMIT_VERSION
-              }}-${{ hashFiles(env.CONFIG_PATH) }}'
+        key: 'pre-commit-lint-${{ runner.os }}-${{ runner.arch }}-node-${{
+              env.NODE_VERSION }}-python-${{ env.PYTHON_VERSION
+              }}-pre-commit-${{ env.PRE_COMMIT_VERSION }}-${{
+              hashFiles(env.CONFIG_PATH) }}'
         path: '~/.cache/pre-commit'
 name: 'Lint'
 'on':

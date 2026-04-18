@@ -5,6 +5,8 @@ disable-model-invocation: true
 user-invocable: true
 ---
 
+<!-- cspell:word oneline -->
+
 # `pr-title-description`
 
 Write (or update) the title and description
@@ -48,7 +50,7 @@ for the pull request on the current branch.
 
    Examples:
 
-   - `feat(ENG-123): Add frame offset scaffolding and SBPF config sourcing`
+   - `feat(ENG-123): Add frame offset scaffolding and asm config sourcing`
    - `fix(ENG-456): Correct off-by-one in order matching`
    - `docs(ENG-789): Add algorithm index page`
 
