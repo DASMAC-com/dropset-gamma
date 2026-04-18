@@ -1,0 +1,58 @@
+# cspell:word checkmake
+# cspell:word frontmatter
+# cspell:word mdformat
+---
+repos:
+- hooks:
+  - args:
+    - '--config-file'
+    - 'cfg/yamllint.yml'
+    - '--strict'
+    id: 'yamllint'
+  repo: 'https://github.com/adrienverge/yamllint'
+  rev: 'v1.38.0'
+- hooks:
+  - args:
+    - '--config'
+    - 'cfg/markdownlint.yml'
+    files: '.(md|mdc)'
+    id: 'markdownlint-fix'
+    types:
+    - 'file'
+  repo: 'https://github.com/igorshubovych/markdownlint-cli'
+  rev: 'v0.48.0'
+- hooks:
+  - additional_dependencies:
+    - 'mdformat-gfm'
+    - 'mdformat-frontmatter'
+    - 'mdformat-myst'
+    files: '.(md|mdc)'
+    id: 'mdformat'
+    types:
+    - 'file'
+  repo: 'https://github.com/hukkin/mdformat'
+  rev: '1.0.0'
+- hooks:
+  - args:
+    - '--config'
+    - 'cfg/cspell.yml'
+    - '--color'
+    - '--no-must-find-files'
+    id: 'cspell'
+  repo: 'https://github.com/streetsidesoftware/cspell-cli'
+  rev: 'v10.0.0'
+- hooks:
+  - id: 'check-added-large-files'
+  - id: 'check-case-conflict'
+  - id: 'detect-private-key'
+  - id: 'end-of-file-fixer'
+  - files: 'cfg/dictionary.txt'
+    id: 'file-contents-sorter'
+  - id: 'mixed-line-ending'
+  repo: 'https://github.com/pre-commit/pre-commit-hooks'
+  rev: 'v6.0.0'
+- hooks:
+  - id: 'checkmake'
+  repo: 'https://github.com/checkmake/checkmake.git'
+  rev: 'v0.3.2'
+...
