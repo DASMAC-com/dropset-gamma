@@ -1,0 +1,11 @@
+[package]
+name = "dropset-gamma"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+anchor-lang-v2.workspace = true
