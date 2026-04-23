@@ -1,4 +1,5 @@
 clob
+dropset
 permissionless
 pubkeys
 solana

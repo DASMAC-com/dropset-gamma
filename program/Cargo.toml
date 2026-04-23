@@ -1,11 +1,13 @@
-[package]
-name = "dropset-gamma"
-version = "0.1.0"
-edition = "2024"
-publish = false
+# cspell:word cdylib
+
+[dependencies]
+anchor-lang-v2.workspace = true
 
 [lib]
 crate-type = ["cdylib", "lib"]
 
-[dependencies]
-anchor-lang-v2.workspace = true
+[package]
+edition = "2024"
+name = "dropset-gamma"
+publish = false
+version = "0.1.0"

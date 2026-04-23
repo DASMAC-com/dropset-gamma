@@ -2,5 +2,6 @@
 members = ["program"]
 resolver = "3"
 
-[workspace.dependencies]
-anchor-lang-v2 = { git = "https://github.com/solana-foundation/anchor.git", branch = "anchor-next" }
+[workspace.dependencies.anchor-lang-v2]
+branch = "anchor-next"
+git = "https://github.com/solana-foundation/anchor.git"
