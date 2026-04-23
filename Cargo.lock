@@ -35,6 +35,7 @@ dependencies = [
  "bytemuck",
  "pinocchio",
  "pinocchio-system",
+ "serde_json",
  "sha2",
  "solana-address",
  "solana-define-syscall 5.1.0",
@@ -227,6 +228,8 @@ name = "dropset-gamma"
 version = "0.1.0"
 dependencies = [
  "anchor-lang-v2",
+ "solana-program-log",
+ "wincode",
 ]
 
 [[package]]
