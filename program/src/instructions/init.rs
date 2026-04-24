@@ -14,11 +14,11 @@ pub struct Init {
 
 impl Init {
     #[inline(always)]
-    pub fn init(&mut self, bump: u8, first_admin: Address) -> Result<()> {
+    pub fn init(&mut self, bump: u8, genesis_admin: Address) -> Result<()> {
         let registry = &mut self.registry;
         registry.max_seats_per_market = DEFAULT_MAX_SEATS_PER_MARKET;
         registry.bump = bump;
-        registry.admins.push(first_admin);
+        registry.admins.push(genesis_admin);
         Ok(())
     }
 }
