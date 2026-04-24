@@ -55,4 +55,11 @@ repos:
   - id: 'checkmake'
   repo: 'https://github.com/checkmake/checkmake.git'
   rev: 'v0.3.2'
+- hooks:
+  - args:
+    - '--autofix'
+    exclude: 'Cargo.lock'
+    id: 'pretty-format-toml'
+  repo: 'https://github.com/macisamuele/language-formatters-pre-commit-hooks'
+  rev: 'v2.16.0'
 ...

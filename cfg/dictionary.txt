@@ -1,4 +1,8 @@
+cfgs
 clob
+dropset
+localnet
 permissionless
 pubkeys
 solana
+wincode
