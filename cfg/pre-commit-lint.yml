@@ -1,4 +1,5 @@
 # cspell:word checkmake
+# cspell:word clippy
 # cspell:word frontmatter
 # cspell:word mdformat
 ---
@@ -45,7 +46,9 @@ repos:
   - id: 'check-added-large-files'
   - id: 'check-case-conflict'
   - id: 'detect-private-key'
-  - id: 'end-of-file-fixer'
+  # .rs files are handled by rustfmt.
+  - exclude: '.*.rs'
+    id: 'end-of-file-fixer'
   - files: 'cfg/dictionary.txt'
     id: 'file-contents-sorter'
   - id: 'mixed-line-ending'
@@ -62,4 +65,19 @@ repos:
     id: 'pretty-format-toml'
   repo: 'https://github.com/macisamuele/language-formatters-pre-commit-hooks'
   rev: 'v2.16.0'
+- hooks:
+  - entry: 'cargo fmt --'
+    id: 'rustfmt'
+    language: 'system'
+    name: 'rustfmt'
+    types:
+    - 'rust'
+  - entry: 'cargo clippy --all-targets -- -D warnings'
+    id: 'clippy'
+    language: 'system'
+    name: 'clippy'
+    pass_filenames: false
+    types:
+    - 'rust'
+  repo: 'local'
 ...

@@ -7,7 +7,7 @@ use anchor_lang_v2::{address_eq, prelude::*};
 pub struct Init {
     #[account(mut)]
     pub payer: Signer,
-    #[account(init, payer = payer, seeds = [b"registry"])]
+    #[account(init, payer = payer, seeds = [b"registry"], bump)]
     pub registry: Account<Registry>,
     pub system_program: Program<System>,
 }
