@@ -1,5 +1,8 @@
 use anchor_lang_v2::prelude::*;
 
+mod instructions;
+use instructions::*;
+
 declare_id!("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
 #[program]
@@ -8,25 +11,14 @@ pub mod dropset {
 
     #[discrim = 0]
     pub fn init(ctx: &mut Context<Init>) -> Result<()> {
-        ctx.accounts.registry.bump = ctx.bumps.registry;
-        ctx.accounts.registry.max_seats_per_market = DEFAULT_MAX_SEATS_PER_MARKET;
-        Ok(())
+        ctx.accounts.init(ctx.bumps.registry, Address::default())
     }
 }
 
-#[derive(Accounts)]
-pub struct Init {
-    #[account(mut)]
-    pub payer: Signer,
-    #[account(init, payer = payer, seeds = [b"registry"])]
-    pub registry: Account<Registry>,
-    pub system_program: Program<System>,
-}
+type FeeRate = u16;
 
 const MAX_ADMINS: usize = 3;
 const MAX_MAKERS: usize = 20;
-const DEFAULT_MAX_SEATS_PER_MARKET: u8 = 10;
-type FeeRate = u16;
 
 #[account]
 pub struct Registry {
