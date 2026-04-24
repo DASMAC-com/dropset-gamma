@@ -1,8 +1,6 @@
 use crate::errors::DropsetError;
-use crate::Registry;
+use crate::{Registry, DEFAULT_MAX_SEATS_PER_MARKET};
 use anchor_lang_v2::{address_eq, prelude::*};
-
-const DEFAULT_MAX_SEATS_PER_MARKET: u8 = 10;
 
 #[derive(Accounts)]
 #[instruction(genesis_admin: Address)]

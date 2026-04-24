@@ -4,6 +4,7 @@ pub type FeeRate = u16;
 
 pub const MAX_REGISTRY_ADMINS: usize = 3;
 pub const MAX_REGISTRY_MAKERS: usize = 20;
+pub const DEFAULT_MAX_SEATS_PER_MARKET: u8 = 10;
 
 #[account]
 pub struct Registry {
