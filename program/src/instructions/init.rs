@@ -1,5 +1,6 @@
+use crate::errors::DropsetError;
 use crate::Registry;
-use anchor_lang_v2::prelude::*;
+use anchor_lang_v2::{address_eq, prelude::*};
 
 const DEFAULT_MAX_SEATS_PER_MARKET: u8 = 10;
 
@@ -15,7 +16,10 @@ pub struct Init {
 
 impl Init {
     #[inline(always)]
-    pub fn init(&mut self, bump: u8, genesis_admin: Address) -> Result<()> {
+    pub fn init(&mut self, bump: u8, genesis_admin: Address, program_id: &Address) -> Result<()> {
+        if !address_eq(self.payer.address(), program_id) {
+            return Err(DropsetError::InvalidInitSigner.into());
+        }
         let registry = &mut self.registry;
         registry.max_seats_per_market = DEFAULT_MAX_SEATS_PER_MARKET;
         registry.bump = bump;
