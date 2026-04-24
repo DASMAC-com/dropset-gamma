@@ -1,6 +1,8 @@
 cfgs
+clippy
 clob
 dropset
+keypair
 localnet
 permissionless
 pubkeys

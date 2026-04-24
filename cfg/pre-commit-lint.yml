@@ -1,5 +1,4 @@
 # cspell:word checkmake
-# cspell:word clippy
 # cspell:word frontmatter
 # cspell:word mdformat
 ---
@@ -52,6 +51,10 @@ repos:
   - files: 'cfg/dictionary.txt'
     id: 'file-contents-sorter'
   - id: 'mixed-line-ending'
+  - args:
+    - '--autofix'
+    exclude: 'package-lock.json'
+    id: 'pretty-format-json'
   repo: 'https://github.com/pre-commit/pre-commit-hooks'
   rev: 'v6.0.0'
 - hooks:
