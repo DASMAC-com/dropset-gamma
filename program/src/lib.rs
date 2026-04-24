@@ -9,7 +9,7 @@ pub use errors::*;
 use instructions::*;
 pub use state::*;
 
-declare_id!("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+declare_id!("EnziKbDPg8KNBA5PQ4NaCJTJx2mSWyNG9rGbh6DjgmwR");
 
 #[program]
 pub mod dropset {

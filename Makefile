@@ -24,4 +24,4 @@ lint:
 	pre-commit run --config cfg/pre-commit-lint.yml --all-files
 
 program: check-anchor-v2
-	cd program && anchor build
+	cd program && anchor keys sync && anchor build
