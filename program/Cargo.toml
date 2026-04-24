@@ -20,7 +20,10 @@ check-cfg = ['cfg(target_os, values("solana"))']
 level = "warn"
 
 [package]
-edition = "2024"
+edition = "2021"
 name = "dropset-gamma"
 publish = false
 version = "0.1.0"
+
+[profile.release]
+overflow-checks = true

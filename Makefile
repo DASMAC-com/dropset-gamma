@@ -15,10 +15,13 @@ check-anchor-v2:
 
 # https://github.com/solana-foundation/anchor/tree/anchor-next/lang-v2
 install-anchor-v2:
-	@CARGO_PROFILE_RELEASE_LTO=off cargo install \
+	CARGO_PROFILE_RELEASE_LTO=off cargo install \
 		--git https://github.com/solana-foundation/anchor.git \
 		--branch anchor-next \
 		anchor-cli --force
 
 lint:
-	@pre-commit run --config cfg/pre-commit-lint.yml --all-files
+	pre-commit run --config cfg/pre-commit-lint.yml --all-files
+
+program: check-anchor-v2
+	cd program && anchor build

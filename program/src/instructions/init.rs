@@ -4,6 +4,7 @@ use anchor_lang_v2::prelude::*;
 const DEFAULT_MAX_SEATS_PER_MARKET: u8 = 10;
 
 #[derive(Accounts)]
+#[instruction(genesis_admin: Address)]
 pub struct Init {
     #[account(mut)]
     pub payer: Signer,
