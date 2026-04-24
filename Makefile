@@ -13,6 +13,9 @@ check-anchor-v2:
 	@anchor --version | grep -q " 2\." \
 		|| { echo "anchor-cli 2.x required"; exit 1; }
 
+debugger: program
+	cd program && anchor debugger
+
 # https://github.com/solana-foundation/anchor/tree/anchor-next/lang-v2
 install-anchor-v2:
 	CARGO_PROFILE_RELEASE_LTO=off cargo install \
@@ -25,3 +28,4 @@ lint:
 
 program: check-anchor-v2
 	cd program && anchor keys sync && anchor build
+
