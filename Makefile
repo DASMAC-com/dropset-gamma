@@ -28,4 +28,3 @@ lint:
 
 program: check-anchor-v2
 	cd program && anchor keys sync && anchor build
-

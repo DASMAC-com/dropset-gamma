@@ -939,6 +939,7 @@ dependencies = [
  "solana-instruction",
  "solana-keypair",
  "solana-loader-v3-interface",
+ "solana-native-token",
  "solana-program-log",
  "solana-pubkey 4.2.0",
  "solana-sdk-ids",
