@@ -1,8 +1,17 @@
+airdrop
+blockhash
+bpf
 cfgs
+clippy
 clob
 dropset
+keypair
+lamports
+litesvm
 localnet
 permissionless
+programdata
 pubkeys
 solana
 wincode
+zeroable
