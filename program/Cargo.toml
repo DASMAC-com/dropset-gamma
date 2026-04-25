@@ -3,10 +3,15 @@
 [dependencies]
 anchor-lang-v2.workspace = true
 solana-program-log.workspace = true
+solana-sdk-ids.workspace = true
 wincode.workspace = true
 
 [dev-dependencies]
 anchor-v2-testing.workspace = true
+solana-instruction.workspace = true
+solana-keypair.workspace = true
+solana-loader-v3-interface.workspace = true
+solana-pubkey.workspace = true
 
 [features]
 cpi = ["no-entrypoint"]
