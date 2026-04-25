@@ -7,10 +7,10 @@ use solana_native_token::LAMPORTS_PER_SOL;
 
 pub use dropset_gamma::ID as PROGRAM_ID;
 
-const PROGRAM_SO: &[u8] = include_bytes!(concat!(
+const PROGRAM_SO_PATH: &str = concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/../target/deploy/dropset_gamma.so"
-));
+);
 const PROGRAM_KEYPAIR_PATH: &str = concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/../target/deploy/dropset_gamma-keypair.json"
@@ -38,22 +38,23 @@ pub fn deploy_with_authority(authority: &Keypair) -> LiteSVM {
     let program_kp = solana_keypair::read_keypair_file(PROGRAM_KEYPAIR_PATH)
         .expect("program keypair (run `anchor keys sync && anchor build`)");
     assert_eq!(program_kp.pubkey(), PROGRAM_ID);
+    let program_so = std::fs::read(PROGRAM_SO_PATH).expect("program .so (run `anchor build`)");
     let buffer_kp = Keypair::new();
 
     let buffer_lamports = svm.minimum_balance_for_rent_exemption(
-        UpgradeableLoaderState::size_of_buffer(PROGRAM_SO.len()),
+        UpgradeableLoaderState::size_of_buffer(program_so.len()),
     );
     let create_buffer = loader_v3::create_buffer(
         &payer.pubkey(),
         &buffer_kp.pubkey(),
         &authority.pubkey(),
         buffer_lamports,
-        PROGRAM_SO.len(),
+        program_so.len(),
     )
     .unwrap();
     send_signed(&mut svm, &[&payer, &buffer_kp], &create_buffer);
 
-    for (i, chunk) in PROGRAM_SO.chunks(WRITE_CHUNK).enumerate() {
+    for (i, chunk) in program_so.chunks(WRITE_CHUNK).enumerate() {
         let ixn = loader_v3::write(
             &buffer_kp.pubkey(),
             &authority.pubkey(),
@@ -71,7 +72,7 @@ pub fn deploy_with_authority(authority: &Keypair) -> LiteSVM {
         &buffer_kp.pubkey(),
         &authority.pubkey(),
         program_lamports,
-        PROGRAM_SO.len(),
+        program_so.len(),
     )
     .unwrap();
     send_signed(&mut svm, &[&payer, &program_kp, authority], &deploy);
