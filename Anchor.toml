@@ -4,3 +4,6 @@ wallet = "~/.config/solana/id.json"
 
 [workspace]
 members = ["program"]
+
+[scripts]
+test = "cargo test"
