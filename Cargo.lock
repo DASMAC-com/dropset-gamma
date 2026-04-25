@@ -137,7 +137,7 @@ checksum = "683d7910e743518b0e34f1186f92494becacb047c7b6bf616c96772180fef923"
 [[package]]
 name = "anchor-derive-accounts-v2"
 version = "2.0.0"
-source = "git+https://github.com/solana-foundation/anchor.git?branch=anchor-next#91f4b5885a948236266750ead6a18c7ba561ba35"
+source = "git+https://github.com/solana-foundation/anchor.git?branch=anchor-next#304dda8c568ffffc01d02d87578dc062109eb257"
 dependencies = [
  "bs58",
  "curve25519-dalek",
@@ -151,7 +151,7 @@ dependencies = [
 [[package]]
 name = "anchor-lang-v2"
 version = "2.0.0"
-source = "git+https://github.com/solana-foundation/anchor.git?branch=anchor-next#91f4b5885a948236266750ead6a18c7ba561ba35"
+source = "git+https://github.com/solana-foundation/anchor.git?branch=anchor-next#304dda8c568ffffc01d02d87578dc062109eb257"
 dependencies = [
  "anchor-derive-accounts-v2",
  "borsh",
@@ -171,7 +171,7 @@ dependencies = [
 [[package]]
 name = "anchor-v2-testing"
 version = "0.1.0"
-source = "git+https://github.com/solana-foundation/anchor.git?branch=anchor-next#91f4b5885a948236266750ead6a18c7ba561ba35"
+source = "git+https://github.com/solana-foundation/anchor.git?branch=anchor-next#304dda8c568ffffc01d02d87578dc062109eb257"
 dependencies = [
  "litesvm",
  "solana-keypair",
