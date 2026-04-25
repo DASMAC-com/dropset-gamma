@@ -4,6 +4,7 @@ clob
 dropset
 keypair
 localnet
+litesvm
 permissionless
 pubkeys
 solana
