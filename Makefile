@@ -14,7 +14,7 @@ check-anchor-v2:
 		|| { echo "anchor-cli 2.x required"; exit 1; }
 
 debugger: program
-	cd program && anchor debugger
+	anchor debugger
 
 # https://github.com/solana-foundation/anchor/tree/anchor-next/lang-v2
 install-anchor-v2:
@@ -27,4 +27,4 @@ lint:
 	pre-commit run --config cfg/pre-commit-lint.yml --all-files
 
 program: check-anchor-v2
-	cd program && anchor keys sync && anchor build
+	anchor keys sync && anchor build

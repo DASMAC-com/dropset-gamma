@@ -20,3 +20,6 @@ git = "https://github.com/solana-foundation/anchor.git"
 [workspace.dependencies.anchor-v2-testing]
 branch = "anchor-next"
 git = "https://github.com/solana-foundation/anchor.git"
+
+[profile.release]
+overflow-checks = true

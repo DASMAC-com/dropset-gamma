@@ -3,4 +3,4 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [workspace]
-members = ["."]
+members = ["program"]

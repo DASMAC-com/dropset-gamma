@@ -13,7 +13,7 @@ const PROGRAM_SO: &[u8] = include_bytes!(concat!(
 ));
 const PROGRAM_KEYPAIR_PATH: &str = concat!(
     env!("CARGO_MANIFEST_DIR"),
-    "/target/deploy/dropset_gamma-keypair.json"
+    "/../target/deploy/dropset_gamma-keypair.json"
 );
 
 /// Fits comfortably under the per-txn size limit.

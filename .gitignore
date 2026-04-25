@@ -1,8 +1,8 @@
 target/
 
 # Track the vanity program keypair.
-!/program/target/
-program/target/*
-!/program/target/deploy/
-program/target/deploy/*
-!/program/target/deploy/dropset_gamma-keypair.json
+!/target/
+/target/*
+!/target/deploy/
+/target/deploy/*
+!/target/deploy/dropset_gamma-keypair.json
