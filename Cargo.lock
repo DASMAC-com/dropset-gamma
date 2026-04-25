@@ -936,7 +936,12 @@ version = "0.1.0"
 dependencies = [
  "anchor-lang-v2",
  "anchor-v2-testing",
+ "solana-instruction",
+ "solana-keypair",
+ "solana-loader-v3-interface",
  "solana-program-log",
+ "solana-pubkey 4.2.0",
+ "solana-sdk-ids",
  "wincode",
 ]
 
@@ -2709,6 +2714,7 @@ dependencies = [
  "solana-instruction",
  "solana-pubkey 4.2.0",
  "solana-sdk-ids",
+ "solana-system-interface 3.2.0",
 ]
 
 [[package]]
