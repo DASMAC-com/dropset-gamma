@@ -20,7 +20,6 @@ struct ProgramDataHeader {
 }
 
 #[derive(Accounts)]
-#[instruction(genesis_admin: Address)]
 pub struct Init {
     #[account(mut)]
     pub payer: Signer,
