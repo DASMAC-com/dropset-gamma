@@ -49,9 +49,13 @@ the hot path. Seats live contiguously inside a shared market account (see
 Maker-supplied prices are **not** validated on write — takers range-check
 at match time, so a nonsense reference price just renders that seat unmatchable.
 
-Every quote gets a unique, totally-ordered identifier drawn from
-`market.nonce`. It breaks ties for **price-time priority** at match time:
-lower nonce = older quote = wins.
+Every quote gets a unique, monotonically increasing identifier drawn
+from `market.nonce` — a global counter incremented on every
+`SetReferencePrice` (and every taker fill). At match time, quotes at
+the same price are ranked by nonce: lower nonce = earlier arrival =
+wins. This is the canonical CLOB **price-time priority** rule, with
+the nonce standing in for "time" — slot timestamps would be too
+coarse, since multiple quotes can land in the same slot.
 
 ```rust
 struct Seat {
