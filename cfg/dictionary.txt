@@ -5,6 +5,7 @@ cfgs
 clippy
 clob
 dropset
+dtolnay
 keypair
 lamports
 litesvm
@@ -13,5 +14,6 @@ permissionless
 programdata
 pubkeys
 solana
+swatinem
 wincode
 zeroable

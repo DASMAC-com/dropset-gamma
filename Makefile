@@ -7,7 +7,6 @@
 
 all: lint
 clean:
-test:
 
 check-anchor-v2:
 	@anchor --version | grep -q " 2\." \
@@ -28,3 +27,7 @@ lint:
 
 program: check-anchor-v2
 	anchor keys sync && anchor build
+
+test: program
+	cargo test
+

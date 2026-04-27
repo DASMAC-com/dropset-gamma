@@ -1,0 +1,23 @@
+---
+env:
+  ANCHOR_REV: '304dda8c568ffffc01d02d87578dc062109eb257'
+jobs:
+  test:
+    name: 'Tests'
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: 'actions/checkout@v6'
+    - uses: 'dtolnay/rust-toolchain@stable'
+    - uses: 'Swatinem/rust-cache@v2'
+      with:
+        cache-on-failure: true
+        shared-key: 'rust-test-${{ runner.os }}'
+    - uses: './.github/actions/install-anchor-v2'
+      with:
+        revision: '${{ env.ANCHOR_REV }}'
+    - name: 'Run tests'
+      run: 'make test'
+name: 'Tests'
+'on':
+  pull_request: null
+...
