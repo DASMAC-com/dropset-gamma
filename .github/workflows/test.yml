@@ -9,14 +9,20 @@ jobs:
     steps:
     - uses: 'actions/checkout@v6'
     - uses: 'dtolnay/rust-toolchain@stable'
-    - uses: 'Swatinem/rust-cache@v2'
-      with:
-        cache-on-failure: true
-        shared-key: 'rust-test-${{ runner.os }}'
     - uses: './.github/actions/install-toolchain'
       with:
         anchor-revision: '${{ env.ANCHOR_REV }}'
         solana-version: '${{ env.SOLANA_VERSION }}'
+    - name: 'Cache cargo dependencies'
+      uses: 'actions/cache@v5'
+      with:
+        key: 'cargo-test-${{ runner.os }}-${{ runner.arch }}-solana-${{
+              env.SOLANA_VERSION }}-${{ hashFiles(''Cargo.lock'') }}'
+        path: |
+          ~/.cargo/git/db
+          ~/.cargo/registry/cache
+          ~/.cargo/registry/index
+          target
     - name: 'Run tests'
       run: 'make test'
 name: 'Tests'
