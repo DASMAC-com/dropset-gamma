@@ -234,21 +234,65 @@ The `Registry` is a global singleton account that holds:
   (`default_taker_fee_rate`) and enforced globally
   (`max_seats_per_market`).
 
+The `Registry` is the simpler precursor to the seat slab below: a
+`RegistryHeader` followed by a contiguous array of fixed-size
+`RegistryEntry` sectors, with **two active doubly linked lists and a
+free list threaded through the same sectors** via each entry's
+`prev`/`next` indices. Admins and makers share one bounded pool — a
+sector vacated by an admin is naturally available to host a maker
+on the next add — and rent grows with population rather than being
+preallocated.
+
+Sectors are allocated on demand: when a new admin or maker is added,
+the account is `realloc`'d by `size_of::<RegistryEntry>()` (or a
+sector is pulled off the free list if one is available). Sectors are
+**never** swap-removed: removal pushes the slot's index onto the
+free list and clears `entry.account` to `Address::default()` as the
+emptiness sentinel. This keeps every entry's index stable for its
+lifetime — mirroring the seat design's pointer-stability rationale,
+just expressed in indices instead of raw pointers.
+
 ```rust
-struct Registry {
-    /// Hard cap on how many seats any one market may allocate
-    /// (up to 255). Enforced at `OpenSeat` time on the Grow path.
-    max_seats_per_market: u8,
+struct RegistryHeader {
     /// Taker fee rate stamped into `MarketHeader.taker_fee_rate`
     /// at market creation. Admins may change a market's fee
     /// later; this field only sets the initial value.
     default_taker_fee_rate: FeeRate,
-    /// Admins authorized to mutate per-market fee rates.
-    admins: [Pubkey; N_ADMINS],
-    /// Makers authorized to hold seats.
-    makers: [Pubkey; N_MAKERS],
+    /// Hard cap on how many seats any one market may allocate
+    /// (up to 255). Enforced at `OpenSeat` time on the Grow path.
+    max_seats_per_market: u8,
+    bump: u8,
+    /// Admin DLL — heads of the active list; `n_admins` is cached
+    /// for O(1) cap checks at `AddAdmin` time.
+    admin_head: EntryIndex,
+    admin_tail: EntryIndex,
+    n_admins: u8,
+    /// Maker DLL — same shape as admins.
+    maker_head: EntryIndex,
+    maker_tail: EntryIndex,
+    n_makers: u8,
+    /// Free list — singly linked via `next`; `prev` is unused on
+    /// freed sectors. `NULL` (= u8::MAX) marks the empty list.
+    free_head: EntryIndex,
+}
+
+struct RegistryEntry {
+    /// On the free list, set to `Address::default()` as the
+    /// emptiness sentinel.
+    account: Address,
+    /// Unused on the free list.
+    prev: EntryIndex,
+    /// On the free list: links to the next free sector.
+    next: EntryIndex,
 }
 ```
+
+Per-role caps (`MAX_REGISTRY_ADMINS`, `MAX_REGISTRY_MAKERS`) are
+constants enforced at `AddAdmin` / `AddMaker` time against the
+cached `n_admins` / `n_makers` counts. Membership tests
+(`is_admin(pk)`, `is_maker(pk)`) walk the relevant DLL only —
+typically ≤3 admins or ≤20 makers — and never iterate the slab's
+raw entry array, which would include free sectors.
 
 ## Maker operations
 

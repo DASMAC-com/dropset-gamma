@@ -1,6 +1,9 @@
 use crate::errors::DropsetError;
-use crate::{Registry, DEFAULT_MAX_SEATS_PER_MARKET};
+use crate::{
+    EntryIndex, Registry, RegistryEntry, RegistryHeader, DEFAULT_MAX_SEATS_PER_MARKET,
+};
 use anchor_lang_v2::{
+    accounts::Slab,
     address_eq,
     bytemuck::{self, Pod, Zeroable},
     find_and_verify_program_address,
@@ -23,8 +26,14 @@ struct ProgramDataHeader {
 pub struct Init {
     #[account(mut)]
     pub payer: Signer,
-    #[account(init, payer = payer, seeds = [b"registry"], bump)]
-    pub registry: Account<Registry>,
+    #[account(
+        init,
+        payer = payer,
+        space = Registry::space_for(1),
+        seeds = [b"registry"],
+        bump,
+    )]
+    pub registry: Slab<RegistryHeader, RegistryEntry>,
     pub system_program: Program<System>,
     pub program_data: UncheckedAccount,
 }
@@ -55,11 +64,26 @@ impl Init {
             return Err(DropsetError::InvalidUpgradeAuthority.into());
         }
 
-        // Init registry values.
+        // Init registry values. EntryIndex::NULL = 0xFF (not zero), so the
+        // empty-list pointers must be written explicitly — otherwise the
+        // zero-init default would be EntryIndex(0), pointing at the genesis
+        // admin's slot.
         let registry = &mut self.registry;
         registry.max_seats_per_market = DEFAULT_MAX_SEATS_PER_MARKET;
         registry.bump = bump;
-        registry.admins.push(genesis_admin);
+        registry.admin_head = EntryIndex(0);
+        registry.admin_tail = EntryIndex(0);
+        registry.n_admins = 1;
+        registry.maker_head = EntryIndex::NULL;
+        registry.maker_tail = EntryIndex::NULL;
+        registry.n_makers = 0;
+        registry.free_head = EntryIndex::NULL;
+        registry.try_push(RegistryEntry {
+            account: genesis_admin,
+            prev: EntryIndex::NULL,
+            next: EntryIndex::NULL,
+            _pad: [0; 6],
+        })?;
         Ok(())
     }
 }

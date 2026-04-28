@@ -98,6 +98,7 @@ pub fn send_ixn(svm: &mut LiteSVM, signer: &Keypair, ixn: Instruction) -> Result
 /// bytemuck-equal to `expected`, total length equal to
 /// `disc.len() + size_of::<T>()` (catches any padding / trailing bytes the
 /// framework might inject).
+#[allow(dead_code)]
 pub fn assert_anchor_account_eq<T>(data: &[u8], owner: &Pubkey, expected: &T)
 where
     T: Discriminator + bytemuck::Pod,
@@ -112,6 +113,56 @@ where
     let (disc, body) = data.split_at(disc_len);
     assert_eq!(disc, T::DISCRIMINATOR, "discriminator mismatch");
     assert_eq!(body, bytemuck::bytes_of(expected), "body bytes mismatch");
+}
+
+/// Slab-aware counterpart to `assert_anchor_account_eq`. Asserts the
+/// account holds `[disc][H][len:u32][pad to align T][T; expected_entries.len()]`,
+/// matching anchor-v2's `Slab<H, T>` layout.
+pub fn assert_slab_eq<H, T>(
+    data: &[u8],
+    owner: &Pubkey,
+    expected_header: &H,
+    expected_entries: &[T],
+) where
+    H: Discriminator + bytemuck::Pod,
+    T: bytemuck::Pod + PartialEq + core::fmt::Debug,
+{
+    let disc_len = H::DISCRIMINATOR.len();
+    let header_size = core::mem::size_of::<H>();
+    let len_offset = disc_len + header_size;
+    let after_len = len_offset + 4;
+    let align = core::mem::align_of::<T>();
+    let items_offset = (after_len + align - 1) & !(align - 1);
+    let entry_size = core::mem::size_of::<T>();
+    let expected_data_len = items_offset + expected_entries.len() * entry_size;
+
+    assert_eq!(owner, &PROGRAM_ID, "account not owned by program");
+    assert_eq!(
+        data.len(),
+        expected_data_len,
+        "slab account length != items_offset + n_entries * size_of::<T>()"
+    );
+
+    let (disc, rest) = data.split_at(disc_len);
+    assert_eq!(disc, H::DISCRIMINATOR, "discriminator mismatch");
+    let header_bytes = &rest[..header_size];
+    assert_eq!(
+        header_bytes,
+        bytemuck::bytes_of(expected_header),
+        "header bytes mismatch"
+    );
+
+    let len_bytes: [u8; 4] = data[len_offset..len_offset + 4].try_into().unwrap();
+    let len = u32::from_le_bytes(len_bytes);
+    assert_eq!(
+        len as usize,
+        expected_entries.len(),
+        "slab len mismatch"
+    );
+
+    let items_bytes = &data[items_offset..items_offset + expected_entries.len() * entry_size];
+    let actual: &[T] = bytemuck::cast_slice(items_bytes);
+    assert_eq!(actual, expected_entries, "slab entries mismatch");
 }
 
 fn send_signed(svm: &mut LiteSVM, signers: &[&Keypair], instructions: &[Instruction]) {
