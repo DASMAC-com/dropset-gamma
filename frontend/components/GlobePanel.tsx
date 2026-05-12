@@ -1,9 +1,19 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Component,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { MeshBasicMaterial } from "three";
 import { COUNTRY_PINS, type CountryPin, findPin } from "@/lib/countries";
 import { useSwapStore } from "@/lib/store";
+import { type CountryFeature, WORLD_POLYGONS } from "@/lib/world-polygons";
 
 const Globe = dynamic(() => import("react-globe.gl"), {
   ssr: false,
@@ -14,16 +24,43 @@ const Globe = dynamic(() => import("react-globe.gl"), {
   ),
 });
 
-const FROM_COLOR = "#3b82f6";
-const TO_COLOR = "#a855f7";
-const IDLE_COLOR = "#737373";
-const ARC_COLOR = "#60a5fa";
+const FROM_COLOR = "#ffffff";
+const TO_COLOR = "#0f172a";
+const IDLE_COLOR = "#64748b";
+const ARC_COLOR = "#facc15";
+const OCEAN_COLOR = 0x0b1726;
 
 type GlobeHandle = {
   controls: () => { autoRotate: boolean; autoRotateSpeed: number };
 };
 
-export function GlobePanel() {
+class GlobeErrorBoundary extends Component<
+  { children: ReactNode },
+  { error: Error | null }
+> {
+  state = { error: null as Error | null };
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+  componentDidCatch(error: Error, info: { componentStack?: string | null }) {
+    console.error("[GlobePanel] crash:", error, info?.componentStack);
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="flex h-[480px] w-full flex-col items-center justify-center gap-2 p-4 text-center text-muted-fg text-sm">
+          <span className="font-medium">Globe failed to load.</span>
+          <code className="max-w-full overflow-auto rounded bg-background px-2 py-1 font-mono text-xs">
+            {String(this.state.error?.message ?? this.state.error)}
+          </code>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function GlobeInner() {
   const globeRef = useRef<GlobeHandle | null>(null);
   const from = useSwapStore((s) => s.from);
   const to = useSwapStore((s) => s.to);
@@ -44,6 +81,11 @@ export function GlobePanel() {
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
+
+  const oceanMaterial = useMemo(
+    () => new MeshBasicMaterial({ color: OCEAN_COLOR }),
+    [],
+  );
 
   const handleGlobeReady = useCallback(() => {
     const g = globeRef.current;
@@ -74,8 +116,8 @@ export function GlobePanel() {
   };
 
   const altitudeFor = (pin: CountryPin) => {
-    if (pin.cca2 === from.cca2 || pin.cca2 === to.cca2) return 0.06;
-    return 0.02;
+    if (pin.cca2 === from.cca2 || pin.cca2 === to.cca2) return 0.08;
+    return 0.04;
   };
 
   return (
@@ -88,14 +130,27 @@ export function GlobePanel() {
         width={size.width}
         height={size.height}
         backgroundColor="rgba(0,0,0,0)"
-        globeImageUrl="//cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg"
+        globeMaterial={oceanMaterial}
+        showAtmosphere={true}
+        atmosphereColor="#7dd3fc"
+        atmosphereAltitude={0.18}
         onGlobeReady={handleGlobeReady}
+        polygonsData={WORLD_POLYGONS}
+        polygonAltitude={0.006}
+        polygonCapColor={(d: object) =>
+          (d as CountryFeature).properties.fillColor
+        }
+        polygonSideColor={() => "rgba(0,0,0,0.2)"}
+        polygonStrokeColor={() => "rgba(255,255,255,0.25)"}
+        polygonLabel={(d: object) =>
+          `<div style="font-family: var(--font-geist-sans); font-size: 12px; padding: 4px 8px; background: rgba(0,0,0,0.7); border-radius: 4px; color: white;">${(d as CountryFeature).properties.name}</div>`
+        }
         pointsData={COUNTRY_PINS}
         pointLat={(d: object) => (d as CountryPin).lat}
         pointLng={(d: object) => (d as CountryPin).lng}
         pointColor={(d: object) => colorFor(d as CountryPin)}
         pointAltitude={(d: object) => altitudeFor(d as CountryPin)}
-        pointRadius={0.4}
+        pointRadius={0.45}
         pointLabel={(d: object) => {
           const p = d as CountryPin;
           return `<div style="font-family: var(--font-geist-sans); font-size: 12px; padding: 4px 8px; background: rgba(0,0,0,0.7); border-radius: 4px; color: white;">${p.name} · ${p.currency}</div>`;
@@ -107,12 +162,20 @@ export function GlobePanel() {
         arcEndLat={(d: object) => (d as { endLat: number }).endLat}
         arcEndLng={(d: object) => (d as { endLng: number }).endLng}
         arcColor={() => ARC_COLOR}
-        arcStroke={0.6}
+        arcStroke={0.8}
         arcDashLength={0.4}
         arcDashGap={0.2}
         arcDashAnimateTime={2000}
         arcAltitude={0.3}
       />
     </div>
+  );
+}
+
+export function GlobePanel() {
+  return (
+    <GlobeErrorBoundary>
+      <GlobeInner />
+    </GlobeErrorBoundary>
   );
 }
