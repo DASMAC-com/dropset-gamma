@@ -1,9 +1,8 @@
 "use client";
 
-import { currencyName } from "@/lib/currencies";
+import { currencyFlag, currencyName } from "@/lib/currencies";
 import { type Side, useSwapStore } from "@/lib/store";
-import { CurrencySelector } from "./CurrencySelector";
-import { StablecoinSelector } from "./StablecoinSelector";
+import { TokenPicker } from "./TokenPicker";
 
 export function TokenRow({ side, label }: { side: Side; label: string }) {
   const activeSide = useSwapStore((s) => s.activeSide);
@@ -17,18 +16,18 @@ export function TokenRow({ side, label }: { side: Side; label: string }) {
         active ? "border-accent" : "border-border"
       }`}
     >
-      <div className="flex items-center gap-2">
-        <span className="text-muted-fg text-xs uppercase tracking-wide">
+      <div className="flex items-center justify-between gap-2">
+        <span className="shrink-0 font-medium text-muted-fg text-sm">
           {label}
         </span>
-        <CurrencySelector side={side} />
-        <span className="ml-auto truncate text-muted-fg text-xs">
-          {currencyName(currency)}
+        <span className="flex min-w-0 items-center gap-1.5 truncate text-muted-fg text-xs">
+          <span aria-hidden className="text-base leading-none">
+            {currencyFlag(currency)}
+          </span>
+          <span className="truncate">{currencyName(currency)}</span>
         </span>
       </div>
-      <div className="flex items-center gap-2">
-        <StablecoinSelector side={side} />
-      </div>
+      <TokenPicker side={side} />
     </div>
   );
 }

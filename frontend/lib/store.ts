@@ -45,8 +45,12 @@ type Store = {
   activeSide: Side;
   openStablecoinPickerFor: Side | null;
   setActiveSide: (side: Side) => void;
-  setCurrency: (side: Side, currency: IsoCurrencyCode) => void;
-  setStablecoin: (side: Side, stablecoin: string) => void;
+  setToken: (
+    side: Side,
+    currency: IsoCurrencyCode,
+    stablecoin: string,
+    cca2: string,
+  ) => void;
   setPinClicked: (pin: CountryPin) => void;
   swapSides: () => void;
   clearStablecoinPickerSignal: () => void;
@@ -60,23 +64,12 @@ export const useSwapStore = create<Store>((set) => ({
 
   setActiveSide: (side) => set({ activeSide: side }),
 
-  setCurrency: (side, currency) =>
-    set((s) => ({
-      [side]: {
-        currency,
-        stablecoin: pickNonCollidingStable(currency, s[otherSide(side)]),
-        cca2: defaultAnchorCca2(currency),
-      },
+  setToken: (side, currency, stablecoin, cca2) =>
+    set({
+      [side]: { currency, stablecoin, cca2 },
       activeSide: side,
       openStablecoinPickerFor: null,
-    })),
-
-  setStablecoin: (side, stablecoin) =>
-    set((s) => ({
-      [side]: { ...s[side], stablecoin },
-      activeSide: side,
-      openStablecoinPickerFor: null,
-    })),
+    }),
 
   setPinClicked: (pin) =>
     set((s) => {
