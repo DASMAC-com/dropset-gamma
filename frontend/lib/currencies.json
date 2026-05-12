@@ -7,13 +7,13 @@
         "symbol": "USDC",
         "name": "USD Coin",
         "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-        "icon": "https://assets.coingecko.com/coins/images/6319/large/usdc.png"
+        "icon": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png"
       },
       {
         "symbol": "USDT",
         "name": "USDT",
         "mint": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-        "icon": "https://assets.coingecko.com/coins/images/325/large/Tether.png"
+        "icon": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB/logo.svg"
       },
       {
         "symbol": "USDG",
@@ -49,19 +49,13 @@
         "symbol": "EURC",
         "name": "EURC",
         "mint": "HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr",
-        "icon": "https://www.circle.com/eurc-icon"
-      }
-    ]
-  },
-  "BRL": {
-    "name": "Brazilian Real",
-    "flag": "🇧🇷",
-    "stablecoins": [
+        "icon": "https://6778953.fs1.hubspotusercontent-na1.net/hubfs/6778953/Brand/EURC/EURC-icon_128x128.png"
+      },
       {
-        "symbol": "BRZ",
-        "name": "BRZ",
-        "mint": "FtgGSFADXBtroxq8VCausXRr2of47QBf5AS1NtZCu4GD",
-        "icon": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/FtgGSFADXBtroxq8VCausXRr2of47QBf5AS1NtZCu4GD/logo.png"
+        "symbol": "VEUR",
+        "name": "VNX Euro",
+        "mint": "C4Kkr9NZU3VbyedcgutU6LKmi6MKz81sx6gRmk5pX519",
+        "icon": "https://vnx.li/wp-content/uploads/2025/04/VEUR-256x256-1.png"
       }
     ]
   },
