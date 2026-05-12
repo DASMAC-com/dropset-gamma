@@ -346,6 +346,11 @@ function GlobeInner() {
     );
   };
 
+  const onLabelClick = (label: object, event: MouseEvent) => {
+    const p = label as CountryPin;
+    openPickerAt(p.name, p.cca2, [p.currency], event.clientX, event.clientY);
+  };
+
   const applyToSide = (
     side: "from" | "to",
     currency: IsoCurrencyCode,
@@ -408,6 +413,8 @@ function GlobeInner() {
         labelAltitude={0.018}
         labelColor={() => "rgba(241, 245, 249, 0.95)"}
         labelResolution={2}
+        labelIncludeDot={true}
+        onLabelClick={onLabelClick}
         onZoom={(pov: { altitude: number }) => setAltitude(pov.altitude)}
       />
 
@@ -525,7 +532,7 @@ function GlobeInner() {
                           ? "Already selected as To"
                           : `Swap from ${s.symbol} (${clickContext.countryName})`
                       }
-                      className={`rounded px-2 py-1 font-medium text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                      className={`w-14 shrink-0 rounded px-2 py-1 text-center font-medium text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                         isFromHere
                           ? "bg-[#3b82f6] text-white"
                           : "border border-border text-muted-fg hover:border-[#3b82f6] hover:text-[#3b82f6]"
@@ -544,7 +551,7 @@ function GlobeInner() {
                           ? "Already selected as From"
                           : `Swap to ${s.symbol} (${clickContext.countryName})`
                       }
-                      className={`rounded px-2 py-1 font-medium text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                      className={`w-14 shrink-0 rounded px-2 py-1 text-center font-medium text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                         isToHere
                           ? "bg-[#10b981] text-white"
                           : "border border-border text-muted-fg hover:border-[#10b981] hover:text-[#10b981]"
