@@ -129,7 +129,7 @@ export function TokenPicker({ side }: { side: Side }) {
             ) : (
               grouped.map(({ code, stables }) => (
                 <div key={code} className="py-1">
-                  <div className="flex items-center gap-1.5 px-2 py-1 text-muted-fg text-xs uppercase tracking-wide">
+                  <div className="mx-2 mb-1 flex items-center gap-1.5 border-border border-b px-0 py-1 text-muted-fg text-xs uppercase tracking-wide">
                     <span aria-hidden className="text-sm leading-none">
                       {currencyFlag(code)}
                     </span>
