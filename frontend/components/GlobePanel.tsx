@@ -1,6 +1,6 @@
 "use client";
 
-import { Compass, Crosshair } from "lucide-react";
+import { Compass, Crosshair, Minus, Pause, Play, Plus } from "lucide-react";
 import dynamic from "next/dynamic";
 import {
   Component,
@@ -11,7 +11,14 @@ import {
   useRef,
   useState,
 } from "react";
-import { MeshBasicMaterial } from "three";
+import {
+  BufferAttribute,
+  BufferGeometry,
+  MeshBasicMaterial,
+  Points,
+  PointsMaterial,
+  type Scene,
+} from "three";
 import { COUNTRY_PINS, type CountryPin, findPin } from "@/lib/countries";
 import {
   CURRENCIES,
@@ -41,15 +48,55 @@ const ARC_COLOR = "#a7f3d0"; // emerald-200 — bright, ties the cool palette to
 const POPOVER_WIDTH = 256;
 const POPOVER_MAX_HEIGHT = 260;
 
-const DEFAULT_POV = { lat: 20, lng: -10, altitude: 2.5 };
+// Start the view centered roughly over the eastern US so the auto-rotation
+// reveals the Atlantic and then Europe — the canonical USD → EUR path.
+const DEFAULT_POV = { lat: 30, lng: -75, altitude: 1.9 };
 
+// Below this altitude, country-name labels become visible.
+const LABEL_VISIBILITY_ALTITUDE = 2.6;
+
+type Pov = { lat: number; lng: number; altitude: number };
 type GlobeHandle = {
   controls: () => { autoRotate: boolean; autoRotateSpeed: number };
-  pointOfView: (
-    pov: { lat: number; lng: number; altitude: number },
-    durationMs?: number,
-  ) => void;
+  pointOfView: (pov?: Pov, durationMs?: number) => Pov;
+  scene: () => Scene;
 };
+
+// Procedurally generated star layer — a Points object placed at a fixed
+// world position, so as the OrbitControls camera moves the stars appear to
+// drift across the sky, anchored to the scene.
+function makeStarLayer({
+  count,
+  radius,
+  size,
+  opacity,
+}: {
+  count: number;
+  radius: number;
+  size: number;
+  opacity: number;
+}) {
+  const positions = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    // Uniform sample on a sphere of given radius.
+    const theta = Math.random() * 2 * Math.PI;
+    const phi = Math.acos(2 * Math.random() - 1);
+    positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+    positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+    positions[i * 3 + 2] = radius * Math.cos(phi);
+  }
+  const geom = new BufferGeometry();
+  geom.setAttribute("position", new BufferAttribute(positions, 3));
+  const mat = new PointsMaterial({
+    color: 0xffffff,
+    size,
+    sizeAttenuation: true,
+    transparent: true,
+    opacity,
+    depthWrite: false,
+  });
+  return new Points(geom, mat);
+}
 
 type ClickContext = {
   countryName: string;
@@ -95,6 +142,8 @@ function GlobeInner() {
   const popoverRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 480, height: 480 });
   const [clickContext, setClickContext] = useState<ClickContext | null>(null);
+  const [spinning, setSpinning] = useState(true);
+  const [altitude, setAltitude] = useState(DEFAULT_POV.altitude);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -134,18 +183,66 @@ function GlobeInner() {
     [],
   );
 
+  const starsAdded = useRef(false);
   const handleGlobeReady = useCallback(() => {
     const g = globeRef.current;
     if (!g) return;
-    const controls = g.controls();
+    const controls = g.controls() as {
+      autoRotate: boolean;
+      autoRotateSpeed: number;
+      minDistance?: number;
+      maxDistance?: number;
+    };
     controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.4;
+    // Negative speed rotates the camera eastward, so starting over the US
+    // gradually pans across the Atlantic to reveal Europe (USD → EUR).
+    controls.autoRotateSpeed = -0.7;
+    // Let the user dolly very close so dense regions (Caribbean, Eurozone)
+    // become separable.
+    controls.minDistance = 101;
+    controls.maxDistance = 600;
     g.pointOfView(DEFAULT_POV, 0);
+
+    if (!starsAdded.current) {
+      const scene = g.scene();
+      // Two layers — a dense bed of faint pinpricks plus a sparser layer of
+      // brighter beacons — gives a natural twinkle-free starfield density.
+      scene.add(
+        makeStarLayer({ count: 2500, radius: 700, size: 1.1, opacity: 0.55 }),
+      );
+      scene.add(
+        makeStarLayer({ count: 280, radius: 700, size: 2.2, opacity: 1 }),
+      );
+      starsAdded.current = true;
+    }
   }, []);
 
   const resetView = () => {
     globeRef.current?.pointOfView(DEFAULT_POV, 800);
   };
+
+  const toggleSpin = () => {
+    const next = !spinning;
+    setSpinning(next);
+    const ctrl = globeRef.current?.controls();
+    if (ctrl) ctrl.autoRotate = next;
+  };
+
+  const ZOOM_STEP = 1.3;
+  const MIN_ALT = 0.05;
+  const MAX_ALT = 4.5;
+  const zoom = (factor: number) => {
+    const g = globeRef.current;
+    if (!g) return;
+    const cur = g.pointOfView();
+    const altitude = Math.max(
+      MIN_ALT,
+      Math.min(MAX_ALT, cur.altitude * factor),
+    );
+    g.pointOfView({ lat: cur.lat, lng: cur.lng, altitude }, 250);
+  };
+  const zoomIn = () => zoom(1 / ZOOM_STEP);
+  const zoomOut = () => zoom(ZOOM_STEP);
 
   const focusOnArc = () => {
     const start = findPin(from.cca2);
@@ -262,13 +359,13 @@ function GlobeInner() {
   return (
     <div
       ref={containerRef}
-      className="relative w-full overflow-hidden rounded-xl border border-border bg-muted"
+      className="relative w-full overflow-hidden rounded-xl border border-border bg-[#020617]"
     >
       <Globe
         ref={globeRef as never}
         width={size.width}
         height={size.height}
-        backgroundColor="rgba(0,0,0,0)"
+        backgroundColor="#020617"
         globeMaterial={oceanMaterial}
         showAtmosphere={true}
         atmosphereColor="#7dd3fc"
@@ -301,19 +398,20 @@ function GlobeInner() {
         arcDashLength={0.4}
         arcDashGap={0.2}
         arcDashAnimateTime={2000}
-        arcAltitude={0.3}
+        arcAltitudeAutoScale={0.5}
+        labelsData={altitude < LABEL_VISIBILITY_ALTITUDE ? COUNTRY_PINS : []}
+        labelLat={(d: object) => (d as CountryPin).lat}
+        labelLng={(d: object) => (d as CountryPin).lng}
+        labelText={(d: object) => (d as CountryPin).name}
+        labelSize={0.42}
+        labelDotRadius={0.15}
+        labelAltitude={0.018}
+        labelColor={() => "rgba(241, 245, 249, 0.95)"}
+        labelResolution={2}
+        onZoom={(pov: { altitude: number }) => setAltitude(pov.altitude)}
       />
 
       <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
-        <button
-          type="button"
-          onClick={focusOnArc}
-          title="Focus on flight path"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 text-muted-fg shadow-sm backdrop-blur transition-colors hover:border-accent hover:text-accent"
-          aria-label="Focus globe on flight path"
-        >
-          <Crosshair size={16} />
-        </button>
         <button
           type="button"
           onClick={resetView}
@@ -322,6 +420,50 @@ function GlobeInner() {
           aria-label="Reset globe orientation"
         >
           <Compass size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={toggleSpin}
+          title={spinning ? "Pause rotation" : "Spin globe"}
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 text-muted-fg shadow-sm backdrop-blur transition-colors hover:border-accent hover:text-accent"
+          aria-label={
+            spinning ? "Pause globe rotation" : "Start globe rotation"
+          }
+        >
+          {spinning ? (
+            <Pause size={16} />
+          ) : (
+            <Play size={16} className="translate-x-px" />
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={zoomIn}
+          title="Zoom in"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 text-muted-fg shadow-sm backdrop-blur transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
+          disabled={altitude <= MIN_ALT + 0.01}
+          aria-label="Zoom in"
+        >
+          <Plus size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={zoomOut}
+          title="Zoom out"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 text-muted-fg shadow-sm backdrop-blur transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
+          disabled={altitude >= MAX_ALT - 0.01}
+          aria-label="Zoom out"
+        >
+          <Minus size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={focusOnArc}
+          title="Focus on flight path"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 text-muted-fg shadow-sm backdrop-blur transition-colors hover:border-accent hover:text-accent"
+          aria-label="Focus globe on flight path"
+        >
+          <Crosshair size={16} />
         </button>
       </div>
 
@@ -380,8 +522,8 @@ function GlobeInner() {
                       }
                       title={
                         isToHere
-                          ? "Already selected as Buy"
-                          : `Sell ${s.symbol} from ${clickContext.countryName}`
+                          ? "Already selected as To"
+                          : `Swap from ${s.symbol} (${clickContext.countryName})`
                       }
                       className={`rounded px-2 py-1 font-medium text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                         isFromHere
@@ -389,7 +531,7 @@ function GlobeInner() {
                           : "border border-border text-muted-fg hover:border-[#3b82f6] hover:text-[#3b82f6]"
                       }`}
                     >
-                      Sell
+                      From
                     </button>
                     <button
                       type="button"
@@ -399,8 +541,8 @@ function GlobeInner() {
                       }
                       title={
                         isFromHere
-                          ? "Already selected as Sell"
-                          : `Buy ${s.symbol} into ${clickContext.countryName}`
+                          ? "Already selected as From"
+                          : `Swap to ${s.symbol} (${clickContext.countryName})`
                       }
                       className={`rounded px-2 py-1 font-medium text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                         isToHere
@@ -408,7 +550,7 @@ function GlobeInner() {
                           : "border border-border text-muted-fg hover:border-[#10b981] hover:text-[#10b981]"
                       }`}
                     >
-                      Buy
+                      To
                     </button>
                   </div>
                 );

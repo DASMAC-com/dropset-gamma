@@ -13,8 +13,8 @@ export function SwapPanel() {
         Swap
       </legend>
       <div className="relative flex flex-col gap-2">
-        <TokenRow side="from" label="Sell" />
-        <TokenRow side="to" label="Buy" />
+        <TokenRow side="from" label="From" />
+        <TokenRow side="to" label="To" />
         <div className="absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 items-center justify-center">
           <SwapArrowButton />
         </div>
