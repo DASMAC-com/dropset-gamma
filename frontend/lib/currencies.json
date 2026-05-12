@@ -1,0 +1,80 @@
+{
+  "USD": {
+    "name": "United States Dollar",
+    "flag": "🇺🇸",
+    "stablecoins": [
+      {
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "icon": "https://assets.coingecko.com/coins/images/6319/large/usdc.png"
+      },
+      {
+        "symbol": "USDT",
+        "name": "USDT",
+        "mint": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+        "icon": "https://assets.coingecko.com/coins/images/325/large/Tether.png"
+      },
+      {
+        "symbol": "USDG",
+        "name": "Global Dollar",
+        "mint": "2u1tszSeqZ3qBWF3uNGPFc8TzMk2tdiwknnRMWGWjGWH",
+        "icon": "https://424565.fs1.hubspotusercontent-na1.net/hubfs/424565/GDN-USDG-Token-512x512.png"
+      },
+      {
+        "symbol": "PYUSD",
+        "name": "PayPal USD",
+        "mint": "2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo",
+        "icon": "https://424565.fs1.hubspotusercontent-na1.net/hubfs/424565/PYUSDLOGO.png"
+      },
+      {
+        "symbol": "USD1",
+        "name": "World Liberty Financial USD",
+        "mint": "USD1ttGY1N17NEEHLmELoaybftRBUSErhqYiQzvEmuB",
+        "icon": "https://raw.githubusercontent.com/worldliberty/usd1-metadata/refs/heads/main/logo.png"
+      },
+      {
+        "symbol": "USX",
+        "name": "USX",
+        "mint": "6FrrzDk5mQARGc1TDYoyVnSyRdds1t4PbtohCD6p3tgG",
+        "icon": "https://raw.githubusercontent.com/Thomas-Solstice/usx-metadata/refs/heads/main/usx.png"
+      }
+    ]
+  },
+  "EUR": {
+    "name": "Euro",
+    "flag": "🇪🇺",
+    "stablecoins": [
+      {
+        "symbol": "EURC",
+        "name": "EURC",
+        "mint": "HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr",
+        "icon": "https://www.circle.com/eurc-icon"
+      }
+    ]
+  },
+  "BRL": {
+    "name": "Brazilian Real",
+    "flag": "🇧🇷",
+    "stablecoins": [
+      {
+        "symbol": "BRZ",
+        "name": "BRZ",
+        "mint": "FtgGSFADXBtroxq8VCausXRr2of47QBf5AS1NtZCu4GD",
+        "icon": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/FtgGSFADXBtroxq8VCausXRr2of47QBf5AS1NtZCu4GD/logo.png"
+      }
+    ]
+  },
+  "CHF": {
+    "name": "Swiss Franc",
+    "flag": "🇨🇭",
+    "stablecoins": [
+      {
+        "symbol": "VCHF",
+        "name": "VNX Swiss Franc",
+        "mint": "AhhdRu5YZdjVkKR3wbnUDaymVQL2ucjMQ63sZ3LFHsch",
+        "icon": "https://vnx.li/wp-content/uploads/2025/04/VCHF-256x256-1.png"
+      }
+    ]
+  }
+}

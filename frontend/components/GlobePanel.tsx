@@ -1,0 +1,118 @@
+"use client";
+
+import dynamic from "next/dynamic";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { COUNTRY_PINS, type CountryPin, findPin } from "@/lib/countries";
+import { useSwapStore } from "@/lib/store";
+
+const Globe = dynamic(() => import("react-globe.gl"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[480px] w-full items-center justify-center text-muted-fg text-sm">
+      Loading globe…
+    </div>
+  ),
+});
+
+const FROM_COLOR = "#3b82f6";
+const TO_COLOR = "#a855f7";
+const IDLE_COLOR = "#737373";
+const ARC_COLOR = "#60a5fa";
+
+type GlobeHandle = {
+  controls: () => { autoRotate: boolean; autoRotateSpeed: number };
+};
+
+export function GlobePanel() {
+  const globeRef = useRef<GlobeHandle | null>(null);
+  const from = useSwapStore((s) => s.from);
+  const to = useSwapStore((s) => s.to);
+  const setPinClicked = useSwapStore((s) => s.setPinClicked);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ width: 480, height: 480 });
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const measure = () => {
+      const w = el.clientWidth || 480;
+      setSize({ width: w, height: Math.min(Math.max(w, 360), 560) });
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const handleGlobeReady = useCallback(() => {
+    const g = globeRef.current;
+    if (!g) return;
+    const controls = g.controls();
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.4;
+  }, []);
+
+  const arcs = useMemo(() => {
+    const start = findPin(from.cca2);
+    const end = findPin(to.cca2);
+    if (!start || !end) return [];
+    return [
+      {
+        startLat: start.lat,
+        startLng: start.lng,
+        endLat: end.lat,
+        endLng: end.lng,
+      },
+    ];
+  }, [from.cca2, to.cca2]);
+
+  const colorFor = (pin: CountryPin) => {
+    if (pin.currency === from.currency) return FROM_COLOR;
+    if (pin.currency === to.currency) return TO_COLOR;
+    return IDLE_COLOR;
+  };
+
+  const altitudeFor = (pin: CountryPin) => {
+    if (pin.cca2 === from.cca2 || pin.cca2 === to.cca2) return 0.06;
+    return 0.02;
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className="w-full overflow-hidden rounded-xl border border-border bg-muted"
+    >
+      <Globe
+        ref={globeRef as never}
+        width={size.width}
+        height={size.height}
+        backgroundColor="rgba(0,0,0,0)"
+        globeImageUrl="//cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg"
+        onGlobeReady={handleGlobeReady}
+        pointsData={COUNTRY_PINS}
+        pointLat={(d: object) => (d as CountryPin).lat}
+        pointLng={(d: object) => (d as CountryPin).lng}
+        pointColor={(d: object) => colorFor(d as CountryPin)}
+        pointAltitude={(d: object) => altitudeFor(d as CountryPin)}
+        pointRadius={0.4}
+        pointLabel={(d: object) => {
+          const p = d as CountryPin;
+          return `<div style="font-family: var(--font-geist-sans); font-size: 12px; padding: 4px 8px; background: rgba(0,0,0,0.7); border-radius: 4px; color: white;">${p.name} · ${p.currency}</div>`;
+        }}
+        onPointClick={(pt: object) => setPinClicked(pt as CountryPin)}
+        arcsData={arcs}
+        arcStartLat={(d: object) => (d as { startLat: number }).startLat}
+        arcStartLng={(d: object) => (d as { startLng: number }).startLng}
+        arcEndLat={(d: object) => (d as { endLat: number }).endLat}
+        arcEndLng={(d: object) => (d as { endLng: number }).endLng}
+        arcColor={() => ARC_COLOR}
+        arcStroke={0.6}
+        arcDashLength={0.4}
+        arcDashGap={0.2}
+        arcDashAnimateTime={2000}
+        arcAltitude={0.3}
+      />
+    </div>
+  );
+}
