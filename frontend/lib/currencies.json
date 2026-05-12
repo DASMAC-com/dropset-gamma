@@ -70,5 +70,41 @@
         "icon": "https://vnx.li/wp-content/uploads/2025/04/VCHF-256x256-1.png"
       }
     ]
+  },
+  "BRL": {
+    "name": "Brazilian Real",
+    "flag": "🇧🇷",
+    "stablecoins": [
+      {
+        "symbol": "BRZ",
+        "name": "BRZ Token",
+        "mint": "BRZbFNQDcWLfcdHmAkqEVnLHCAWKTRf6eHyEaWdZp3JN",
+        "icon": "https://transferotokensconfig.blob.core.windows.net/stablesimages/BRZ/ico/ico_BRZ_750x750.png"
+      }
+    ]
+  },
+  "JPY": {
+    "name": "Japanese Yen",
+    "flag": "🇯🇵",
+    "stablecoins": [
+      {
+        "symbol": "GYEN",
+        "name": "GMO JPY",
+        "mint": "Crn4x1Y2HUKko7ox2EZMT6N2t2ZyH7eKtwkBGVnhEq1g",
+        "icon": "https://stablecoin.z.com/assets/images/token/icon_gyen_300_300.png"
+      }
+    ]
+  },
+  "AUD": {
+    "name": "Australian Dollar",
+    "flag": "🇦🇺",
+    "stablecoins": [
+      {
+        "symbol": "AUDD",
+        "name": "AUDD",
+        "mint": "AUDDttiEpCydTm7joUMbYddm72jAWXZnCpPZtDoxqBSw",
+        "icon": "https://assets.coingecko.com/coins/images/33263/standard/AUDD-Logo-Blue_512.png"
+      }
+    ]
   }
 }
