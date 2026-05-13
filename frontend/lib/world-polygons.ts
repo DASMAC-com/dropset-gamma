@@ -13,8 +13,10 @@ for (const c of countries) {
   const supported = Object.keys(c.currencies ?? {}).filter((k) =>
     supportedSet.has(k),
   ) as IsoCurrencyCode[];
-  // TopoJSON ids in countries-110m are unpadded decimal strings.
-  idToCountryInfo.set(String(Number.parseInt(c.ccn3, 10)), {
+  // world-atlas's countries-110m uses 3-digit zero-padded ISO numeric codes
+  // ("076" for Brazil, "840" for USA). world-countries' `ccn3` is already in
+  // the same padded form, so use it directly as the join key.
+  idToCountryInfo.set(c.ccn3, {
     cca2: c.cca2,
     cca3: c.cca3,
     currencies: supported,

@@ -1,6 +1,5 @@
 "use client";
 
-import { Compass, Crosshair, Minus, Pause, Play, Plus } from "lucide-react";
 import dynamic from "next/dynamic";
 import {
   Component,
@@ -27,6 +26,7 @@ import {
 } from "@/lib/currencies";
 import { useSwapStore } from "@/lib/store";
 import { type CountryFeature, WORLD_POLYGONS } from "@/lib/world-polygons";
+import { Compass, Crosshair, Minus, Pause, Play, Plus } from "./Icons";
 
 const Globe = dynamic(() => import("react-globe.gl"), {
   ssr: false,
@@ -302,11 +302,11 @@ function GlobeInner() {
   const polygonAltitude = (d: object) => {
     const f = d as CountryFeature;
     const supports = f.properties.currencies;
-    if (supports.length === 0) return 0.004;
+    if (supports.length === 0) return 0.003;
     if (supports.includes(from.currency) || supports.includes(to.currency)) {
-      return 0.014;
+      return 0.008;
     }
-    return 0.008;
+    return 0.005;
   };
 
   const openPickerAt = useCallback(
@@ -392,7 +392,7 @@ function GlobeInner() {
         ringMaxRadius={1.6}
         ringPropagationSpeed={0.7}
         ringRepeatPeriod={2200}
-        ringAltitude={0.015}
+        ringAltitude={0.012}
         arcsData={arcs}
         arcStartLat={(d: object) => (d as { startLat: number }).startLat}
         arcStartLng={(d: object) => (d as { startLng: number }).startLng}
@@ -403,14 +403,14 @@ function GlobeInner() {
         arcDashLength={0.4}
         arcDashGap={0.2}
         arcDashAnimateTime={2000}
-        arcAltitudeAutoScale={0.5}
+        arcAltitude={0.32}
         labelsData={altitude < LABEL_VISIBILITY_ALTITUDE ? COUNTRY_PINS : []}
         labelLat={(d: object) => (d as CountryPin).lat}
         labelLng={(d: object) => (d as CountryPin).lng}
         labelText={(d: object) => (d as CountryPin).name}
         labelSize={0.42}
         labelDotRadius={0.15}
-        labelAltitude={0.018}
+        labelAltitude={0.012}
         labelColor={() => "rgba(241, 245, 249, 0.95)"}
         labelResolution={2}
         labelIncludeDot={true}
