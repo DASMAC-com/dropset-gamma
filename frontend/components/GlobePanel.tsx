@@ -1,6 +1,14 @@
 "use client";
 
-import { Compass, Crosshair, Minus, Pause, Play, Plus } from "lucide-react";
+import {
+  Compass,
+  Crosshair,
+  Flag,
+  Minus,
+  Pause,
+  Play,
+  Plus,
+} from "lucide-react";
 import dynamic from "next/dynamic";
 import {
   Component,
@@ -55,6 +63,19 @@ const DEFAULT_POV = { lat: 30, lng: -75, altitude: 1.9 };
 
 // Below this altitude, country-name labels become visible.
 const LABEL_VISIBILITY_ALTITUDE = 2.6;
+
+// Build a flag emoji from a 2-letter country code by mapping each letter to
+// its Regional Indicator Symbol (🇺 + 🇸 → 🇺🇸). Pure data transform — works
+// for any valid ISO 3166-1 alpha-2 code that the OS has emoji glyphs for.
+const cca2ToFlag = (cca2: string): string => {
+  const A = "A".charCodeAt(0);
+  const RI = 0x1f1e6;
+  return cca2
+    .toUpperCase()
+    .split("")
+    .map((c) => String.fromCodePoint(RI + c.charCodeAt(0) - A))
+    .join("");
+};
 
 type Pov = { lat: number; lng: number; altitude: number };
 type GlobeHandle = {
@@ -188,6 +209,7 @@ function GlobeInner() {
   const [size, setSize] = useState({ width: 480, height: 480 });
   const [clickContext, setClickContext] = useState<ClickContext | null>(null);
   const [spinning, setSpinning] = useState(true);
+  const [showFlags, setShowFlags] = useState(false);
   const [altitude, setAltitude] = useState(DEFAULT_POV.altitude);
   const [globeReady, setGlobeReady] = useState(false);
 
@@ -199,6 +221,14 @@ function GlobeInner() {
     if (altitude < 0.3) return 0.08;
     if (altitude < 0.8) return 0.32;
     return 1.4;
+  }, [altitude]);
+
+  // Mirrors the labelSize buckets so flag emoji scale roughly in step with
+  // the text labels they replace.
+  const flagFontPx = useMemo(() => {
+    if (altitude < 0.3) return 14;
+    if (altitude < 0.8) return 20;
+    return 28;
   }, [altitude]);
 
   useEffect(() => {
@@ -504,7 +534,7 @@ function GlobeInner() {
         // hop, regardless of how far apart the endpoints are.
         arcAltitude={0.18}
         labelsData={
-          altitude >= LABEL_VISIBILITY_ALTITUDE
+          showFlags || altitude >= LABEL_VISIBILITY_ALTITUDE
             ? []
             : altitude < 0.8
               ? COUNTRY_PINS
@@ -528,6 +558,31 @@ function GlobeInner() {
         labelResolution={2}
         labelIncludeDot={true}
         onLabelClick={onLabelClick}
+        htmlElementsData={
+          showFlags && altitude < LABEL_VISIBILITY_ALTITUDE
+            ? altitude < 0.8
+              ? COUNTRY_PINS
+              : FAR_ZOOM_PINS
+            : []
+        }
+        htmlLat={(d: object) => (d as CountryPin).lat}
+        htmlLng={(d: object) => (d as CountryPin).lng}
+        htmlAltitude={0.012}
+        htmlElement={(d: object) => {
+          const pin = d as CountryPin;
+          const el = document.createElement("div");
+          el.textContent = cca2ToFlag(pin.cca2);
+          el.style.fontSize = `${flagFontPx}px`;
+          el.style.lineHeight = "1";
+          el.style.cursor = "pointer";
+          el.style.userSelect = "none";
+          el.style.transform = "translate(-50%, -50%)";
+          el.title = pin.name;
+          el.addEventListener("click", (e) => {
+            onLabelClick(pin, e);
+          });
+          return el;
+        }}
         onZoom={(pov: { altitude: number }) => setAltitude(pov.altitude)}
       />
 
@@ -549,6 +604,24 @@ function GlobeInner() {
           aria-label="Focus globe on flight path"
         >
           <Crosshair size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowFlags((v) => !v)}
+          title={showFlags ? "Show country names" : "Show flag emojis"}
+          className={`flex h-9 w-9 items-center justify-center rounded-full border bg-background/80 shadow-sm backdrop-blur transition-colors hover:border-accent hover:text-accent ${
+            showFlags
+              ? "border-accent text-accent"
+              : "border-border text-muted-fg"
+          }`}
+          aria-label={
+            showFlags
+              ? "Switch globe labels to country names"
+              : "Switch globe labels to flag emojis"
+          }
+          aria-pressed={showFlags}
+        >
+          <Flag size={16} />
         </button>
         <button
           type="button"
