@@ -24,6 +24,7 @@ export function TokenPicker({ side }: { side: Side }) {
   );
   const setToken = useSwapStore((s) => s.setToken);
   const setActiveSide = useSwapStore((s) => s.setActiveSide);
+  const openPickerRequest = useSwapStore((s) => s.openPickerRequest);
 
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -35,6 +36,10 @@ export function TokenPicker({ side }: { side: Side }) {
   useEffect(() => {
     if (!open) setQuery("");
   }, [open]);
+
+  useEffect(() => {
+    if (openPickerRequest?.side === side) setOpen(true);
+  }, [openPickerRequest, side]);
 
   const isBlocked = (cur: IsoCurrencyCode, sym: string) =>
     cur === otherSideState.currency && sym === otherSideState.stablecoin;

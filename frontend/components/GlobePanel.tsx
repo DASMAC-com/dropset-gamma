@@ -375,12 +375,26 @@ function GlobeInner() {
     const start = findPin(from.cca2);
     const end = findPin(to.cca2);
     if (!start || !end) return [];
+    // Scale apex altitude with great-circle distance so widely-separated
+    // (especially near-antipodal) pairs like JPY ↔ BRL arch high enough to
+    // clear the globe instead of clipping through it.
+    const toRad = (d: number) => (d * Math.PI) / 180;
+    const phi1 = toRad(start.lat);
+    const phi2 = toRad(end.lat);
+    const dPhi = phi2 - phi1;
+    const dLam = toRad(end.lng - start.lng);
+    const h =
+      Math.sin(dPhi / 2) ** 2 +
+      Math.cos(phi1) * Math.cos(phi2) * Math.sin(dLam / 2) ** 2;
+    const angular = 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+    const altitude = 0.15 + (angular / Math.PI) * 0.4;
     return [
       {
         startLat: start.lat,
         startLng: start.lng,
         endLat: end.lat,
         endLng: end.lng,
+        altitude,
       },
     ];
   }, [from.cca2, to.cca2]);
@@ -529,10 +543,10 @@ function GlobeInner() {
         arcDashLength={0.4}
         arcDashGap={0.2}
         arcDashAnimateTime={2000}
-        // Fixed apex height: the arc always bows to the same altitude above
-        // the globe surface so the flight path reads as a direct pin-to-pin
-        // hop, regardless of how far apart the endpoints are.
-        arcAltitude={0.18}
+        // Apex altitude scales with great-circle distance (see useMemo above):
+        // close pairs get a low bow, near-antipodal pairs arch high enough to
+        // clear the globe surface instead of clipping through it.
+        arcAltitude={(d: object) => (d as { altitude: number }).altitude}
         labelsData={
           showFlags || altitude >= LABEL_VISIBILITY_ALTITUDE
             ? []
