@@ -22,6 +22,8 @@ import {
 import { COUNTRY_PINS, type CountryPin, findPin } from "@/lib/countries";
 import {
   CURRENCIES,
+  currencyFlag,
+  currencyName,
   type IsoCurrencyCode,
   tokenIconUrl,
 } from "@/lib/currencies";
@@ -106,6 +108,40 @@ type ClickContext = {
   y: number;
 };
 
+// Pre-clustered subset of COUNTRY_PINS for use at the most zoomed-out
+// label-visible altitude band: greedy area-weighted clustering drops the
+// smaller pins inside any 4°-radius proximity cluster so dense regions
+// (the Lesser Antilles, Eurozone microstates) don't pile labels on top of
+// each other at the default view. Smaller territories return as soon as
+// the camera zooms past the medium-close bucket.
+const FAR_ZOOM_PROXIMITY_DEG = 4;
+function angularDistanceDeg(a: CountryPin, b: CountryPin): number {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const p1 = toRad(a.lat);
+  const p2 = toRad(b.lat);
+  const dp = toRad(b.lat - a.lat);
+  const dl = toRad(b.lng - a.lng);
+  const h =
+    Math.sin(dp / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) ** 2;
+  return (2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h)) * 180) / Math.PI;
+}
+const FAR_ZOOM_PINS: CountryPin[] = (() => {
+  const byAreaDesc = [...COUNTRY_PINS].sort((a, b) => b.area - a.area);
+  const primary: CountryPin[] = [];
+  const covered = new Set<string>();
+  for (const pin of byAreaDesc) {
+    if (covered.has(pin.cca2)) continue;
+    primary.push(pin);
+    for (const other of COUNTRY_PINS) {
+      if (other.cca2 === pin.cca2 || covered.has(other.cca2)) continue;
+      if (angularDistanceDeg(pin, other) < FAR_ZOOM_PROXIMITY_DEG) {
+        covered.add(other.cca2);
+      }
+    }
+  }
+  return primary;
+})();
+
 class GlobeErrorBoundary extends Component<
   { children: ReactNode },
   { error: Error | null }
@@ -145,11 +181,15 @@ function GlobeInner() {
   const [spinning, setSpinning] = useState(true);
   const [altitude, setAltitude] = useState(DEFAULT_POV.altitude);
 
-  // Two-state label size: only shrinks when the camera is zoomed in close
-  // enough to risk dense-region label collision (Caribbean, Eurozone
-  // microstates). One threshold means at most one labels-layer rebuild
-  // during a zoom motion.
-  const labelSize = useMemo(() => (altitude < 0.5 ? 0.08 : 0.75), [altitude]);
+  // Three-bucket label size. The labels layer only rebuilds when crossing
+  // a bucket boundary (a couple of times across a full zoom, not per
+  // frame), so this stays non-glitchy while keeping text readable at every
+  // zoom level.
+  const labelSize = useMemo(() => {
+    if (altitude < 0.3) return 0.08;
+    if (altitude < 0.8) return 0.32;
+    return 1.4;
+  }, [altitude]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -413,7 +453,13 @@ function GlobeInner() {
         // the globe surface so the flight path reads as a direct pin-to-pin
         // hop, regardless of how far apart the endpoints are.
         arcAltitude={0.18}
-        labelsData={altitude < LABEL_VISIBILITY_ALTITUDE ? COUNTRY_PINS : []}
+        labelsData={
+          altitude >= LABEL_VISIBILITY_ALTITUDE
+            ? []
+            : altitude < 0.8
+              ? COUNTRY_PINS
+              : FAR_ZOOM_PINS
+        }
         labelLat={(d: object) => (d as CountryPin).lat}
         labelLng={(d: object) => (d as CountryPin).lng}
         labelText={(d: object) =>
@@ -508,78 +554,88 @@ function GlobeInner() {
             </span>
           </div>
           <div className="flex-1 overflow-y-auto p-1">
-            {clickContext.currencies.flatMap((cur) =>
-              CURRENCIES[cur].stablecoins.map((s) => {
-                const isFromHere =
-                  cur === from.currency && s.symbol === from.stablecoin;
-                const isToHere =
-                  cur === to.currency && s.symbol === to.stablecoin;
-                return (
-                  <div
-                    key={`${cur}-${s.symbol}`}
-                    className="flex w-full items-center gap-1 rounded-md px-2 py-1.5"
-                  >
-                    {/* biome-ignore lint/performance/noImgElement: small static icon, no optimization needed */}
-                    <img
-                      src={tokenIconUrl(s.symbol)}
-                      alt=""
-                      aria-hidden
-                      width={20}
-                      height={20}
-                      className="h-5 w-5 shrink-0 rounded-full"
-                    />
-                    <span className="flex min-w-0 flex-1 flex-col text-sm">
-                      <span className="font-mono text-foreground">
-                        {s.symbol}
-                      </span>
-                      {s.name !== s.symbol && (
-                        <span className="truncate text-muted-fg text-xs">
-                          {s.name}
+            {clickContext.currencies.map((cur) => (
+              <div key={cur} className="py-1">
+                <div className="mx-2 mb-1 flex items-center gap-1.5 border-border border-b px-0 py-1 text-muted-fg text-xs uppercase tracking-wide">
+                  <span aria-hidden className="text-sm leading-none">
+                    {currencyFlag(cur)}
+                  </span>
+                  <span className="font-medium">{cur}</span>
+                  <span className="text-muted-fg">·</span>
+                  <span>{currencyName(cur)}</span>
+                </div>
+                {CURRENCIES[cur].stablecoins.map((s) => {
+                  const isFromHere =
+                    cur === from.currency && s.symbol === from.stablecoin;
+                  const isToHere =
+                    cur === to.currency && s.symbol === to.stablecoin;
+                  return (
+                    <div
+                      key={`${cur}-${s.symbol}`}
+                      className="flex w-full items-center gap-1 rounded-md px-2 py-1.5"
+                    >
+                      {/* biome-ignore lint/performance/noImgElement: small static icon, no optimization needed */}
+                      <img
+                        src={tokenIconUrl(s.symbol)}
+                        alt=""
+                        aria-hidden
+                        width={20}
+                        height={20}
+                        className="h-5 w-5 shrink-0 rounded-full"
+                      />
+                      <span className="flex min-w-0 flex-1 flex-col text-sm">
+                        <span className="font-mono text-foreground">
+                          {s.symbol}
                         </span>
-                      )}
-                    </span>
-                    <button
-                      type="button"
-                      disabled={isToHere}
-                      onClick={() =>
-                        applyToSide("from", cur, s.symbol, clickContext.cca2)
-                      }
-                      title={
-                        isToHere
-                          ? "Already selected as To"
-                          : `Swap from ${s.symbol} (${clickContext.countryName})`
-                      }
-                      className={`w-14 shrink-0 rounded px-2 py-1 text-center font-medium text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
-                        isFromHere
-                          ? "bg-[#3b82f6] text-white"
-                          : "border border-border text-muted-fg hover:border-[#3b82f6] hover:text-[#3b82f6]"
-                      }`}
-                    >
-                      From
-                    </button>
-                    <button
-                      type="button"
-                      disabled={isFromHere}
-                      onClick={() =>
-                        applyToSide("to", cur, s.symbol, clickContext.cca2)
-                      }
-                      title={
-                        isFromHere
-                          ? "Already selected as From"
-                          : `Swap to ${s.symbol} (${clickContext.countryName})`
-                      }
-                      className={`w-14 shrink-0 rounded px-2 py-1 text-center font-medium text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
-                        isToHere
-                          ? "bg-[#10b981] text-white"
-                          : "border border-border text-muted-fg hover:border-[#10b981] hover:text-[#10b981]"
-                      }`}
-                    >
-                      To
-                    </button>
-                  </div>
-                );
-              }),
-            )}
+                        {s.name !== s.symbol && (
+                          <span className="truncate text-muted-fg text-xs">
+                            {s.name}
+                          </span>
+                        )}
+                      </span>
+                      <button
+                        type="button"
+                        disabled={isToHere}
+                        onClick={() =>
+                          applyToSide("from", cur, s.symbol, clickContext.cca2)
+                        }
+                        title={
+                          isToHere
+                            ? "Already selected as To"
+                            : `Swap from ${s.symbol} (${clickContext.countryName})`
+                        }
+                        className={`w-14 shrink-0 rounded px-2 py-1 text-center font-medium text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                          isFromHere
+                            ? "bg-[#3b82f6] text-white"
+                            : "border border-border text-muted-fg hover:border-[#3b82f6] hover:text-[#3b82f6]"
+                        }`}
+                      >
+                        From
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isFromHere}
+                        onClick={() =>
+                          applyToSide("to", cur, s.symbol, clickContext.cca2)
+                        }
+                        title={
+                          isFromHere
+                            ? "Already selected as From"
+                            : `Swap to ${s.symbol} (${clickContext.countryName})`
+                        }
+                        className={`w-14 shrink-0 rounded px-2 py-1 text-center font-medium text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                          isToHere
+                            ? "bg-[#10b981] text-white"
+                            : "border border-border text-muted-fg hover:border-[#10b981] hover:text-[#10b981]"
+                        }`}
+                      >
+                        To
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
       )}
