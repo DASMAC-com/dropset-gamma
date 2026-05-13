@@ -1,17 +1,4 @@
 {
-  "name": "@dasmac-com/dropset-gamma-frontend",
-  "version": "0.1.0",
-  "private": true,
-  "packageManager": "pnpm@10.30.3",
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "check": "tsc --noEmit",
-    "lint": "biome check",
-    "lint:fix": "biome check --write",
-    "format": "biome format --write"
-  },
   "dependencies": {
     "@radix-ui/react-popover": "^1.1.15",
     "lucide-react": "^1.14.0",
@@ -37,5 +24,18 @@
     "babel-plugin-react-compiler": "^1.0.0",
     "tailwindcss": "^4.3.0",
     "typescript": "^5.6.0"
-  }
+  },
+  "name": "@dasmac-com/dropset-gamma-frontend",
+  "packageManager": "pnpm@10.30.3",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "check": "tsc --noEmit",
+    "dev": "next dev",
+    "format": "biome format --write",
+    "lint": "biome check",
+    "lint:fix": "biome check --write",
+    "start": "next start"
+  },
+  "version": "0.1.0"
 }
