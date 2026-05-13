@@ -1,5 +1,7 @@
 ---
 extends: 'default'
+ignore: |
+  **/pnpm-lock.yaml
 rules:
   braces:
     forbid: true

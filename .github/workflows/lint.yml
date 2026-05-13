@@ -19,9 +19,16 @@ jobs:
       with:
         cache-on-failure: true
         shared-key: 'rust-lint-${{ runner.os }}'
+    - uses: 'pnpm/action-setup@v6'
+      with:
+        package_json_file: 'frontend/package.json'
     - uses: 'actions/setup-node@v6'
       with:
+        cache: 'pnpm'
+        cache-dependency-path: 'frontend/pnpm-lock.yaml'
         node-version: '${{ env.NODE_VERSION }}'
+    - run: 'pnpm install --frozen-lockfile'
+      working-directory: 'frontend'
     - uses: 'actions/setup-python@v6'
       with:
         cache: 'pip'
