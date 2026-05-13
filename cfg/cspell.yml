@@ -5,4 +5,6 @@ dictionaryDefinitions:
 - addWords: true
   name: 'repo-words'
   path: './dictionary.txt'
+ignorePaths:
+- '**/pnpm-lock.yaml'
 ...
