@@ -543,6 +543,15 @@ function GlobeInner() {
         </button>
         <button
           type="button"
+          onClick={focusOnArc}
+          title="Focus on flight path"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 text-muted-fg shadow-sm backdrop-blur transition-colors hover:border-accent hover:text-accent"
+          aria-label="Focus globe on flight path"
+        >
+          <Crosshair size={16} />
+        </button>
+        <button
+          type="button"
           onClick={toggleSpin}
           title={spinning ? "Pause rotation" : "Spin globe"}
           className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 text-muted-fg shadow-sm backdrop-blur transition-colors hover:border-accent hover:text-accent"
@@ -575,15 +584,6 @@ function GlobeInner() {
           aria-label="Zoom out"
         >
           <Minus size={16} />
-        </button>
-        <button
-          type="button"
-          onClick={focusOnArc}
-          title="Focus on flight path"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/80 text-muted-fg shadow-sm backdrop-blur transition-colors hover:border-accent hover:text-accent"
-          aria-label="Focus globe on flight path"
-        >
-          <Crosshair size={16} />
         </button>
       </div>
 
