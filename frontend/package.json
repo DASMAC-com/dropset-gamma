@@ -25,7 +25,7 @@
     "tailwindcss": "^4.3.0",
     "typescript": "^5.6.0"
   },
-  "name": "@dasmac-com/dropset-gamma-frontend",
+  "name": "dropset-gamma-frontend",
   "packageManager": "pnpm@10.30.3",
   "private": true,
   "scripts": {
