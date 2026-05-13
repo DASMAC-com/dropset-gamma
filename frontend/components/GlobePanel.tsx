@@ -170,6 +170,16 @@ class GlobeErrorBoundary extends Component<
 
 function GlobeInner() {
   const globeRef = useRef<GlobeHandle | null>(null);
+  // Mirror the imperative-handle ref into state so the init effect can react
+  // to it. react-kapsule fires onGlobeReady from its mount layoutEffect, which
+  // can run *before* useImperativeHandle commits the parent ref — depending
+  // only on globeReady would then run the effect once with a null ref and
+  // never retry once the ref shows up.
+  const [globeHandle, setGlobeHandle] = useState<GlobeHandle | null>(null);
+  const setGlobeRef = useCallback((handle: GlobeHandle | null) => {
+    globeRef.current = handle;
+    setGlobeHandle(handle);
+  }, []);
   const from = useSwapStore((s) => s.from);
   const to = useSwapStore((s) => s.to);
   const setToken = useSwapStore((s) => s.setToken);
@@ -180,6 +190,7 @@ function GlobeInner() {
   const [clickContext, setClickContext] = useState<ClickContext | null>(null);
   const [spinning, setSpinning] = useState(true);
   const [altitude, setAltitude] = useState(DEFAULT_POV.altitude);
+  const [globeReady, setGlobeReady] = useState(false);
 
   // Three-bucket label size. The labels layer only rebuilds when crossing
   // a bucket boundary (a couple of times across a full zoom, not per
@@ -229,11 +240,17 @@ function GlobeInner() {
     [],
   );
 
-  const starsAdded = useRef(false);
-  const handleGlobeReady = useCallback(() => {
-    const g = globeRef.current;
-    if (!g) return;
-    const controls = g.controls() as {
+  // Drive init from an effect that depends on BOTH onGlobeReady having fired
+  // and the imperative handle being committed. react-kapsule fires
+  // onGlobeReady from its mount layoutEffect, which can run before
+  // useImperativeHandle commits the parent ref. If we only keyed on
+  // globeReady, the effect could run once with a null handle and never
+  // retry once the handle showed up.
+  const handleGlobeReady = useCallback(() => setGlobeReady(true), []);
+
+  useEffect(() => {
+    if (!globeReady || !globeHandle) return;
+    const controls = globeHandle.controls() as {
       autoRotate: boolean;
       autoRotateSpeed: number;
       minDistance?: number;
@@ -247,21 +264,24 @@ function GlobeInner() {
     // become separable.
     controls.minDistance = 101;
     controls.maxDistance = 600;
-    g.pointOfView(DEFAULT_POV, 0);
+    globeHandle.pointOfView(DEFAULT_POV, 0);
 
-    if (!starsAdded.current) {
-      const scene = g.scene();
-      // Two layers — a dense bed of faint pinpricks plus a sparser layer of
-      // brighter beacons — gives a natural twinkle-free starfield density.
-      scene.add(
-        makeStarLayer({ count: 2500, radius: 700, size: 1.1, opacity: 0.55 }),
-      );
-      scene.add(
-        makeStarLayer({ count: 280, radius: 700, size: 2.2, opacity: 1 }),
-      );
-      starsAdded.current = true;
-    }
-  }, []);
+    const scene = globeHandle.scene();
+    // Two layers — a dense bed of faint pinpricks plus a sparser layer of
+    // brighter beacons — gives a natural twinkle-free starfield density.
+    const layers = [
+      makeStarLayer({ count: 2500, radius: 700, size: 1.1, opacity: 0.55 }),
+      makeStarLayer({ count: 280, radius: 700, size: 2.2, opacity: 1 }),
+    ];
+    for (const layer of layers) scene.add(layer);
+    return () => {
+      for (const layer of layers) {
+        scene.remove(layer);
+        layer.geometry.dispose();
+        (layer.material as PointsMaterial).dispose();
+      }
+    };
+  }, [globeReady, globeHandle]);
 
   const resetView = () => {
     globeRef.current?.pointOfView(DEFAULT_POV, 800);
@@ -413,7 +433,7 @@ function GlobeInner() {
       className="relative w-full overflow-hidden rounded-xl border border-border bg-[#020617]"
     >
       <Globe
-        ref={globeRef as never}
+        ref={setGlobeRef as never}
         width={size.width}
         height={size.height}
         backgroundColor="#020617"
