@@ -139,6 +139,19 @@
       }
     ]
   },
+  "NGN": {
+    "name": "Nigerian Naira",
+    "flag": "🇳🇬",
+    "anchorCca2": "NG",
+    "stablecoins": [
+      {
+        "symbol": "CNGN",
+        "name": "CNGN",
+        "mint": "3jiqwBQVRC5zRwHyqvnkQurebJ5RNxg3F5fXMwaxgkv8",
+        "icon": "https://black-elaborate-wildcat-667.mypinata.cloud/ipfs/bafkreihl3tm6zdwmcyiaurafzfmblu5olk7ozpelftop7ydbvaalm2vooi"
+      }
+    ]
+  },
   "ZAR": {
     "name": "South African Rand",
     "flag": "🇿🇦",
