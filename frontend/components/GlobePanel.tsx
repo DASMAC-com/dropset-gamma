@@ -145,6 +145,12 @@ function GlobeInner() {
   const [spinning, setSpinning] = useState(true);
   const [altitude, setAltitude] = useState(DEFAULT_POV.altitude);
 
+  // Two-state label size: only shrinks when the camera is zoomed in close
+  // enough to risk dense-region label collision (Caribbean, Eurozone
+  // microstates). One threshold means at most one labels-layer rebuild
+  // during a zoom motion.
+  const labelSize = useMemo(() => (altitude < 0.5 ? 0.08 : 0.42), [altitude]);
+
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -407,9 +413,17 @@ function GlobeInner() {
         labelsData={altitude < LABEL_VISIBILITY_ALTITUDE ? COUNTRY_PINS : []}
         labelLat={(d: object) => (d as CountryPin).lat}
         labelLng={(d: object) => (d as CountryPin).lng}
-        labelText={(d: object) => (d as CountryPin).name}
-        labelSize={0.42}
-        labelDotRadius={0.15}
+        labelText={(d: object) =>
+          // globe.gl uses the default Helvetiker typeface for labels, which
+          // doesn't include Latin Extended glyphs (é, ô, ç, etc.). Strip
+          // diacritics so names like "Saint Barthélemy" render as
+          // "Saint Barthelemy" instead of "Saint Barth?lemy".
+          (d as CountryPin).name
+            .normalize("NFKD")
+            .replace(/\p{Diacritic}/gu, "")
+        }
+        labelSize={labelSize}
+        labelDotRadius={labelSize * 0.36}
         labelAltitude={0.012}
         labelColor={() => "rgba(241, 245, 249, 0.95)"}
         labelResolution={2}
