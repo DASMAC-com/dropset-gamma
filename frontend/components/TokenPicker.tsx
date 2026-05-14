@@ -1,7 +1,6 @@
 "use client";
 
 import * as Popover from "@radix-ui/react-popover";
-import { Check, ChevronDown, ExternalLink, Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
   CURRENCIES,
@@ -13,6 +12,7 @@ import {
 import { useAppEvent } from "@/lib/events";
 import { type Side, useSwapStore } from "@/lib/store";
 import { CurrencyGroupHeader } from "./CurrencyGroupHeader";
+import { Check, ChevronDown, ExternalLink, Search } from "./icons";
 
 const explorerUrl = (mint: string) =>
   `https://explorer.solana.com/address/${mint}`;
