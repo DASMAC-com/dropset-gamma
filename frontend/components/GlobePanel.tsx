@@ -1,5 +1,6 @@
 "use client";
 
+import * as Dialog from "@radix-ui/react-dialog";
 import dynamic from "next/dynamic";
 import {
   Component,
@@ -31,7 +32,7 @@ import { useAppEvent } from "@/lib/events";
 import { useSwapStore } from "@/lib/store";
 import { type CountryFeature, WORLD_POLYGONS } from "@/lib/world-polygons";
 import { CurrencyGroupHeader } from "./CurrencyGroupHeader";
-import { Compass, Crosshair, Flag, Minus, Pause, Play, Plus } from "./icons";
+import { Compass, Crosshair, Flag, Minus, Pause, Play, Plus, X } from "./icons";
 
 const Globe = dynamic(() => import("react-globe.gl"), {
   ssr: false,
@@ -50,8 +51,6 @@ const LAND_UNCOVERED = "#1e293b"; // slate-800 — no supported currency
 const OCEAN_COLOR = 0x0b1726;
 const ARC_COLOR = "#a7f3d0"; // emerald-200 — bright, ties the cool palette together
 
-const POPOVER_WIDTH = 256;
-const POPOVER_MAX_HEIGHT = 260;
 
 // Height of the "same-country" pillar (a vertical cylinder over the shared
 // anchor) and the spinning ring that sits on top of it.
@@ -128,8 +127,6 @@ type ClickContext = {
   countryName: string;
   cca2: string;
   currencies: IsoCurrencyCode[];
-  x: number;
-  y: number;
 };
 
 // Pre-clustered subset of COUNTRY_PINS for use at the most zoomed-out
@@ -209,7 +206,6 @@ function GlobeInner() {
   const setToken = useSwapStore((s) => s.setToken);
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const popoverRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 480, height: 480 });
   const [clickContext, setClickContext] = useState<ClickContext | null>(null);
   const [spinning, setSpinning] = useState(true);
@@ -282,26 +278,6 @@ function GlobeInner() {
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-
-  useEffect(() => {
-    if (!clickContext) return;
-    const onDown = (e: MouseEvent) => {
-      if (popoverRef.current?.contains(e.target as Node)) return;
-      setClickContext(null);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setClickContext(null);
-    };
-    const t = setTimeout(() => {
-      document.addEventListener("mousedown", onDown);
-      document.addEventListener("keydown", onKey);
-    }, 0);
-    return () => {
-      clearTimeout(t);
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [clickContext]);
 
   const oceanMaterial = useMemo(
     () => new MeshBasicMaterial({ color: OCEAN_COLOR }),
@@ -502,47 +478,26 @@ function GlobeInner() {
   };
 
   const openPickerAt = useCallback(
-    (
-      name: string,
-      cca2: string,
-      currencies: IsoCurrencyCode[],
-      clientX: number,
-      clientY: number,
-    ) => {
+    (name: string, cca2: string, currencies: IsoCurrencyCode[]) => {
       if (currencies.length === 0 || !cca2) {
         setClickContext(null);
         return;
       }
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      const localX = clientX - rect.left;
-      const localY = clientY - rect.top;
-      const x = Math.min(Math.max(8, localX), rect.width - POPOVER_WIDTH - 8);
-      const y = Math.min(
-        Math.max(8, localY + 8),
-        rect.height - POPOVER_MAX_HEIGHT - 8,
-      );
-      setClickContext({ countryName: name, cca2, currencies, x, y });
+      setClickContext({ countryName: name, cca2, currencies });
     },
     [],
   );
 
-  const onPolygonClick = (poly: object, event: MouseEvent) => {
+  const onPolygonClick = (poly: object) => {
     setSpinning(false);
     const f = poly as CountryFeature;
-    openPickerAt(
-      f.properties.name,
-      f.properties.cca2,
-      f.properties.currencies,
-      event.clientX,
-      event.clientY,
-    );
+    openPickerAt(f.properties.name, f.properties.cca2, f.properties.currencies);
   };
 
-  const onLabelClick = (label: object, event: MouseEvent) => {
+  const onLabelClick = (label: object) => {
     setSpinning(false);
     const p = label as CountryPin;
-    openPickerAt(p.name, p.cca2, [p.currency], event.clientX, event.clientY);
+    openPickerAt(p.name, p.cca2, [p.currency]);
   };
 
   const onGlobeClick = () => setSpinning(false);
@@ -719,8 +674,8 @@ function GlobeInner() {
           // Keep flags below the country popover (z-40) when both are visible.
           el.style.zIndex = "1";
           el.title = pin.name;
-          el.addEventListener("click", (e) => {
-            onLabelClick(pin, e);
+          el.addEventListener("click", () => {
+            onLabelClick(pin);
           });
           return el;
         }}
@@ -804,101 +759,117 @@ function GlobeInner() {
         </button>
       </div>
 
-      {clickContext && (
-        <div
-          ref={popoverRef}
-          className="absolute z-40 flex flex-col overflow-hidden rounded-xl border border-border bg-background shadow-lg"
-          style={{
-            left: clickContext.x,
-            top: clickContext.y,
-            width: POPOVER_WIDTH,
-            maxHeight: POPOVER_MAX_HEIGHT,
-          }}
-        >
-          <div className="border-border border-b px-3 py-2 text-xs">
-            <span className="truncate font-medium text-foreground">
-              {clickContext.countryName}
-            </span>
-          </div>
-          <div className="flex-1 overflow-y-auto p-1">
-            {clickContext.currencies.map((cur) => (
-              <div key={cur} className="py-1">
-                <CurrencyGroupHeader code={cur} />
-                {CURRENCIES[cur].stablecoins.map((s) => {
-                  const isFromHere =
-                    cur === from.currency && s.symbol === from.stablecoin;
-                  const isToHere =
-                    cur === to.currency && s.symbol === to.stablecoin;
-                  return (
-                    <div
-                      key={`${cur}-${s.symbol}`}
-                      className="flex w-full items-center gap-1 rounded-md px-2 py-1.5"
-                    >
-                      {/* biome-ignore lint/performance/noImgElement: small static icon, no optimization needed */}
-                      <img
-                        src={tokenIconUrl(s.symbol)}
-                        alt=""
-                        aria-hidden
-                        width={20}
-                        height={20}
-                        className="h-5 w-5 shrink-0 rounded-full"
-                      />
-                      <span className="flex min-w-0 flex-1 flex-col text-sm">
-                        <span className="font-mono text-foreground">
-                          {s.symbol}
-                        </span>
-                        {s.name !== s.symbol && (
-                          <span className="truncate text-muted-fg text-xs">
-                            {s.name}
+      <Dialog.Root
+        open={clickContext !== null}
+        onOpenChange={(o) => {
+          if (!o) setClickContext(null);
+        }}
+      >
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 z-40 bg-background/70 backdrop-blur-sm" />
+          <Dialog.Content
+            aria-describedby={undefined}
+            className="-translate-x-1/2 fixed top-[8vh] left-1/2 z-50 flex max-h-[84vh] w-[min(420px,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border border-border bg-background shadow-lg"
+          >
+            <div className="flex items-center gap-2 border-border border-b px-3 py-2">
+              <Dialog.Title className="min-w-0 flex-1 truncate text-foreground text-sm">
+                {clickContext?.countryName ?? ""}
+              </Dialog.Title>
+              <kbd className="hidden shrink-0 rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-fg sm:inline-block">
+                Esc
+              </kbd>
+              <Dialog.Close
+                aria-label="Close"
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-fg hover:bg-muted hover:text-foreground"
+              >
+                <X size={14} />
+              </Dialog.Close>
+            </div>
+            <div className="flex-1 overflow-y-auto p-1">
+              {clickContext?.currencies.map((cur) => (
+                <div key={cur} className="py-1">
+                  <CurrencyGroupHeader code={cur} />
+                  {CURRENCIES[cur].stablecoins.map((s) => {
+                    const isFromHere =
+                      cur === from.currency && s.symbol === from.stablecoin;
+                    const isToHere =
+                      cur === to.currency && s.symbol === to.stablecoin;
+                    return (
+                      <div
+                        key={`${cur}-${s.symbol}`}
+                        className="flex w-full items-center gap-1 rounded-md px-2 py-1.5"
+                      >
+                        {/* biome-ignore lint/performance/noImgElement: small static icon, no optimization needed */}
+                        <img
+                          src={tokenIconUrl(s.symbol)}
+                          alt=""
+                          aria-hidden
+                          width={20}
+                          height={20}
+                          className="h-5 w-5 shrink-0 rounded-full"
+                        />
+                        <span className="flex min-w-0 flex-1 flex-col text-sm">
+                          <span className="font-mono text-foreground">
+                            {s.symbol}
                           </span>
-                        )}
-                      </span>
-                      <button
-                        type="button"
-                        disabled={isToHere}
-                        onClick={() =>
-                          applyToSide("from", cur, s.symbol, clickContext.cca2)
-                        }
-                        title={
-                          isToHere
-                            ? "Already selected as To"
-                            : `Swap from ${s.symbol} (${clickContext.countryName})`
-                        }
-                        className={`w-14 shrink-0 rounded px-2 py-1 text-center font-medium text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
-                          isFromHere
-                            ? "bg-[#3b82f6] text-white"
-                            : "border border-border text-muted-fg hover:border-[#3b82f6] hover:text-[#3b82f6]"
-                        }`}
-                      >
-                        From
-                      </button>
-                      <button
-                        type="button"
-                        disabled={isFromHere}
-                        onClick={() =>
-                          applyToSide("to", cur, s.symbol, clickContext.cca2)
-                        }
-                        title={
-                          isFromHere
-                            ? "Already selected as From"
-                            : `Swap to ${s.symbol} (${clickContext.countryName})`
-                        }
-                        className={`w-14 shrink-0 rounded px-2 py-1 text-center font-medium text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
-                          isToHere
-                            ? "bg-[#10b981] text-white"
-                            : "border border-border text-muted-fg hover:border-[#10b981] hover:text-[#10b981]"
-                        }`}
-                      >
-                        To
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+                          {s.name !== s.symbol && (
+                            <span className="truncate text-muted-fg text-xs">
+                              {s.name}
+                            </span>
+                          )}
+                        </span>
+                        <button
+                          type="button"
+                          disabled={isToHere}
+                          onClick={() =>
+                            applyToSide(
+                              "from",
+                              cur,
+                              s.symbol,
+                              clickContext.cca2,
+                            )
+                          }
+                          title={
+                            isToHere
+                              ? "Already selected as To"
+                              : `Swap from ${s.symbol} (${clickContext.countryName})`
+                          }
+                          className={`w-14 shrink-0 rounded px-2 py-1 text-center font-medium text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                            isFromHere
+                              ? "bg-[#3b82f6] text-white"
+                              : "border border-border text-muted-fg hover:border-[#3b82f6] hover:text-[#3b82f6]"
+                          }`}
+                        >
+                          From
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isFromHere}
+                          onClick={() =>
+                            applyToSide("to", cur, s.symbol, clickContext.cca2)
+                          }
+                          title={
+                            isFromHere
+                              ? "Already selected as From"
+                              : `Swap to ${s.symbol} (${clickContext.countryName})`
+                          }
+                          className={`w-14 shrink-0 rounded px-2 py-1 text-center font-medium text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                            isToHere
+                              ? "bg-[#10b981] text-white"
+                              : "border border-border text-muted-fg hover:border-[#10b981] hover:text-[#10b981]"
+                          }`}
+                        >
+                          To
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 }
