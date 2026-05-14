@@ -694,7 +694,7 @@ function GlobeInner() {
         labelIncludeDot={true}
         onLabelClick={onLabelClick}
         htmlElementsData={
-          showFlags && altitude < LABEL_VISIBILITY_ALTITUDE
+          showFlags
             ? altitude < 0.8
               ? COUNTRY_PINS
               : FAR_ZOOM_PINS
