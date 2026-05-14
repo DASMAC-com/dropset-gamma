@@ -10,12 +10,10 @@ import {
   tokenIconUrl,
 } from "@/lib/currencies";
 import { useAppEvent } from "@/lib/events";
+import { explorerAddressUrl } from "@/lib/explorer";
 import { type Side, useSwapStore } from "@/lib/store";
 import { CurrencyGroupHeader } from "./CurrencyGroupHeader";
 import { Check, ChevronDown, ExternalLink, Search } from "./icons";
-
-const explorerUrl = (mint: string) =>
-  `https://explorer.solana.com/address/${mint}`;
 
 export function TokenPicker({ side }: { side: Side }) {
   const currency = useSwapStore((s) => s[side].currency);
@@ -184,7 +182,7 @@ export function TokenPicker({ side }: { side: Side }) {
           )}
         </button>
         <a
-          href={explorerUrl(s.mint)}
+          href={explorerAddressUrl(s.mint)}
           target="_blank"
           rel="noopener noreferrer"
           title={`View ${s.symbol} on Solana Explorer`}

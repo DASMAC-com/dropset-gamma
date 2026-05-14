@@ -1,15 +1,14 @@
 "use client";
 
-import { useWalletConnection, useWalletModalState } from "@solana/react-hooks";
+import { useWalletConnection } from "@solana/react-hooks";
+import { emit } from "@/lib/events";
 import { useSameToken } from "@/lib/store";
 import { SwapArrowButton } from "./SwapArrowButton";
 import { TokenRow } from "./TokenRow";
-import { WalletPickerDialog } from "./WalletPickerDialog";
 
 export function SwapPanel() {
   const sameToken = useSameToken();
   const { connected, status } = useWalletConnection();
-  const modal = useWalletModalState({ closeOnConnect: true });
 
   const isConnecting = status === "connecting";
   const disabled = sameToken || isConnecting;
@@ -21,7 +20,7 @@ export function SwapPanel() {
     onClick = () => {};
   } else if (!connected) {
     label = isConnecting ? "Connecting…" : "Connect Wallet";
-    onClick = () => modal.open();
+    onClick = () => emit("openWalletModal");
   } else {
     label = "Swap";
     onClick = () => {};
@@ -45,7 +44,6 @@ export function SwapPanel() {
       >
         {label}
       </button>
-      <WalletPickerDialog />
     </div>
   );
 }
