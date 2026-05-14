@@ -9,6 +9,7 @@ cfgs
 clippy
 clob
 cngn
+dasmac
 dropset
 dtolnay
 eurc
@@ -35,5 +36,6 @@ vchf
 vercel
 veur
 wincode
+wordmark
 zarp
 zeroable
