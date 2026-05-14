@@ -100,7 +100,7 @@
     "anchorCca2": "GB",
     "stablecoins": [
       {
-        "symbol": "tGBP",
+        "symbol": "TGBP",
         "name": "tGBP",
         "mint": "2zMqyX4AYCk6mgy5UZ2S7zUaLxwERhK5WjqDzkPPbSpW",
         "icon": "https://raw.githubusercontent.com/superset-finance/token-metadata/main/tGBP/logo.png"
@@ -143,6 +143,19 @@
         "name": "CNGN",
         "mint": "3jiqwBQVRC5zRwHyqvnkQurebJ5RNxg3F5fXMwaxgkv8",
         "icon": "https://black-elaborate-wildcat-667.mypinata.cloud/ipfs/bafkreihl3tm6zdwmcyiaurafzfmblu5olk7ozpelftop7ydbvaalm2vooi"
+      }
+    ]
+  },
+  "SGD": {
+    "name": "Singapore Dollar",
+    "flag": "🇸🇬",
+    "anchorCca2": "SG",
+    "stablecoins": [
+      {
+        "symbol": "XSGD",
+        "name": "StraitsX SGD",
+        "mint": "71S9cppWipeUEQDFngYwxjoxB6Sz1MUqX72byLsVYJqy",
+        "icon": "https://asset-metadata-service-production.s3.amazonaws.com/asset_icons/280bb9b042350d497dd8f2f5f38edb1a843bff581778d3678473e37f50bef0da.png"
       }
     ]
   },
