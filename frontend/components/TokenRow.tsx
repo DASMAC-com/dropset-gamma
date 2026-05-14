@@ -9,6 +9,7 @@ import {
 import { useAppEvent } from "@/lib/events";
 import { type Side, useSwapStore } from "@/lib/store";
 import { FromBalanceButtons } from "./FromBalanceButtons";
+import { MaxSlippageButton } from "./MaxSlippageButton";
 import { TokenPicker } from "./TokenPicker";
 
 const sanitizeAmount = (raw: string, decimals: number): string => {
@@ -94,7 +95,7 @@ export function TokenRow({ side, label }: { side: Side; label: string }) {
             {currencyName(currency)} ({currency})
           </span>
         </span>
-        {side === "from" && <FromBalanceButtons />}
+        {side === "from" ? <FromBalanceButtons /> : <MaxSlippageButton />}
       </div>
       <div className="flex items-center gap-2">
         <TokenPicker side={side} />

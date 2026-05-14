@@ -25,7 +25,7 @@ export function Header() {
           />
         </Link>
         <nav className="flex items-center gap-2">
-          <span className="inline-flex h-9 items-center rounded-md border border-muted-fg/50 bg-foreground/10 px-3 font-medium text-foreground text-sm">
+          <span className="inline-flex h-9 items-center rounded-md border border-muted-fg/40 bg-foreground/[0.07] px-3 font-medium text-foreground text-sm">
             Swap
           </span>
         </nav>
