@@ -23,22 +23,16 @@
         "icon": "https://424565.fs1.hubspotusercontent-na1.net/hubfs/424565/GDN-USDG-Token-512x512.png"
       },
       {
-        "symbol": "PYUSD",
-        "name": "PayPal USD",
-        "mint": "2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo",
-        "icon": "https://424565.fs1.hubspotusercontent-na1.net/hubfs/424565/PYUSDLOGO.png"
-      },
-      {
         "symbol": "USD1",
         "name": "World Liberty Financial USD",
         "mint": "USD1ttGY1N17NEEHLmELoaybftRBUSErhqYiQzvEmuB",
         "icon": "https://raw.githubusercontent.com/worldliberty/usd1-metadata/refs/heads/main/logo.png"
       },
       {
-        "symbol": "USX",
-        "name": "USX",
-        "mint": "6FrrzDk5mQARGc1TDYoyVnSyRdds1t4PbtohCD6p3tgG",
-        "icon": "https://raw.githubusercontent.com/Thomas-Solstice/usx-metadata/refs/heads/main/usx.png"
+        "symbol": "PYUSD",
+        "name": "PayPal USD",
+        "mint": "2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo",
+        "icon": "https://424565.fs1.hubspotusercontent-na1.net/hubfs/424565/PYUSDLOGO.png"
       }
     ]
   },
@@ -61,29 +55,16 @@
       }
     ]
   },
-  "GBP": {
-    "name": "British Pound",
-    "flag": "🇬🇧",
-    "anchorCca2": "GB",
+  "AUD": {
+    "name": "Australian Dollar",
+    "flag": "🇦🇺",
+    "anchorCca2": "AU",
     "stablecoins": [
       {
-        "symbol": "tGBP",
-        "name": "tGBP",
-        "mint": "2zMqyX4AYCk6mgy5UZ2S7zUaLxwERhK5WjqDzkPPbSpW",
-        "icon": "https://raw.githubusercontent.com/superset-finance/token-metadata/main/tGBP/logo.png"
-      }
-    ]
-  },
-  "CHF": {
-    "name": "Swiss Franc",
-    "flag": "🇨🇭",
-    "anchorCca2": "CH",
-    "stablecoins": [
-      {
-        "symbol": "VCHF",
-        "name": "VNX Swiss Franc",
-        "mint": "AhhdRu5YZdjVkKR3wbnUDaymVQL2ucjMQ63sZ3LFHsch",
-        "icon": "https://vnx.li/wp-content/uploads/2025/04/VCHF-256x256-1.png"
+        "symbol": "AUDD",
+        "name": "AUDD",
+        "mint": "AUDDttiEpCydTm7joUMbYddm72jAWXZnCpPZtDoxqBSw",
+        "icon": "https://assets.coingecko.com/coins/images/33263/standard/AUDD-Logo-Blue_512.png"
       }
     ]
   },
@@ -100,6 +81,32 @@
       }
     ]
   },
+  "CHF": {
+    "name": "Swiss Franc",
+    "flag": "🇨🇭",
+    "anchorCca2": "CH",
+    "stablecoins": [
+      {
+        "symbol": "VCHF",
+        "name": "VNX Swiss Franc",
+        "mint": "AhhdRu5YZdjVkKR3wbnUDaymVQL2ucjMQ63sZ3LFHsch",
+        "icon": "https://vnx.li/wp-content/uploads/2025/04/VCHF-256x256-1.png"
+      }
+    ]
+  },
+  "GBP": {
+    "name": "British Pound",
+    "flag": "🇬🇧",
+    "anchorCca2": "GB",
+    "stablecoins": [
+      {
+        "symbol": "tGBP",
+        "name": "tGBP",
+        "mint": "2zMqyX4AYCk6mgy5UZ2S7zUaLxwERhK5WjqDzkPPbSpW",
+        "icon": "https://raw.githubusercontent.com/superset-finance/token-metadata/main/tGBP/logo.png"
+      }
+    ]
+  },
   "JPY": {
     "name": "Japanese Yen",
     "flag": "🇯🇵",
@@ -110,19 +117,6 @@
         "name": "GMO JPY",
         "mint": "Crn4x1Y2HUKko7ox2EZMT6N2t2ZyH7eKtwkBGVnhEq1g",
         "icon": "https://stablecoin.z.com/assets/images/token/icon_gyen_300_300.png"
-      }
-    ]
-  },
-  "AUD": {
-    "name": "Australian Dollar",
-    "flag": "🇦🇺",
-    "anchorCca2": "AU",
-    "stablecoins": [
-      {
-        "symbol": "AUDD",
-        "name": "AUDD",
-        "mint": "AUDDttiEpCydTm7joUMbYddm72jAWXZnCpPZtDoxqBSw",
-        "icon": "https://assets.coingecko.com/coins/images/33263/standard/AUDD-Logo-Blue_512.png"
       }
     ]
   },
