@@ -1,5 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { emit } from "@/lib/events";
+import { Keyboard } from "./icons";
 
 export function Header() {
   return (
@@ -24,11 +28,20 @@ export function Header() {
             Swap
           </span>
         </nav>
+        <button
+          type="button"
+          onClick={() => emit("toggleHelp")}
+          aria-label="Show keyboard shortcuts"
+          title="Keyboard shortcuts (/)"
+          className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground hover:bg-muted"
+        >
+          <Keyboard size={18} />
+        </button>
         <a
           href="https://x.com/__Dropset__"
           target="_blank"
           rel="noopener noreferrer"
-          className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground hover:bg-muted"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground hover:bg-muted"
         >
           <span className="sr-only">Dropset on X</span>
           <svg
