@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export function Header() {
@@ -8,7 +9,14 @@ export function Header() {
           href="/"
           className="flex shrink-0 items-center gap-2 font-semibold text-base text-foreground no-underline"
         >
-          dropset
+          <Image
+            src="/favicon.png"
+            alt=""
+            width={36}
+            height={36}
+            priority
+          />
+          Dropset
         </Link>
         <nav className="flex items-center gap-2">
           <span className="rounded-md bg-muted px-3 py-1.5 text-sm text-foreground">
