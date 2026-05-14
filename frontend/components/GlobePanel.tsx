@@ -594,6 +594,8 @@ function GlobeInner() {
           // canvas interactions (rotate/zoom) still work through it; each
           // child has to opt back in to receive its own click.
           el.style.pointerEvents = "auto";
+          // Keep flags below the country popover (z-40) when both are visible.
+          el.style.zIndex = "1";
           el.title = pin.name;
           el.addEventListener("click", (e) => {
             onLabelClick(pin, e);
@@ -680,7 +682,7 @@ function GlobeInner() {
       {clickContext && (
         <div
           ref={popoverRef}
-          className="absolute z-30 flex flex-col overflow-hidden rounded-xl border border-border bg-background shadow-lg"
+          className="absolute z-40 flex flex-col overflow-hidden rounded-xl border border-border bg-background shadow-lg"
           style={{
             left: clickContext.x,
             top: clickContext.y,
