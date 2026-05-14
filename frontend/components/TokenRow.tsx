@@ -9,11 +9,12 @@ export function TokenRow({ side, label }: { side: Side; label: string }) {
   const currency = useSwapStore((s) => s[side].currency);
 
   const active = activeSide === side;
+  const activeBorder = side === "to" ? "border-accent-buy" : "border-accent";
 
   return (
     <div
       className={`flex w-full flex-col gap-2 rounded-lg border bg-muted p-4 text-left transition-colors ${
-        active ? "border-accent" : "border-border"
+        active ? activeBorder : "border-border"
       }`}
     >
       <div className="flex items-center justify-between gap-2">

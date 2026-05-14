@@ -12,6 +12,8 @@
   --border: #262626;
   --accent: #60a5fa;
   --accent-hover: #93bbfd;
+  --accent-buy: #10b981;
+  --accent-buy-hover: #34d399;
 }
 
 @theme inline {
@@ -22,6 +24,8 @@
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
+  --color-accent-buy: var(--accent-buy);
+  --color-accent-buy-hover: var(--accent-buy-hover);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

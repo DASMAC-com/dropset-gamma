@@ -1,15 +1,35 @@
 "use client";
 
+import { useWalletConnection, useWalletModalState } from "@solana/react-hooks";
 import { useSameToken } from "@/lib/store";
 import { SwapArrowButton } from "./SwapArrowButton";
 import { TokenRow } from "./TokenRow";
+import { WalletPickerDialog } from "./WalletPickerDialog";
 
 export function SwapPanel() {
   const sameToken = useSameToken();
+  const { connected, status } = useWalletConnection();
+  const modal = useWalletModalState({ closeOnConnect: true });
+
+  const isConnecting = status === "connecting";
+  const disabled = sameToken || isConnecting;
+
+  let label: string;
+  let onClick: () => void;
+  if (sameToken) {
+    label = "Pick a different token";
+    onClick = () => {};
+  } else if (!connected) {
+    label = isConnecting ? "Connecting…" : "Connect Wallet";
+    onClick = () => modal.open();
+  } else {
+    label = "Swap";
+    onClick = () => {};
+  }
 
   return (
     <div className="relative rounded-xl border border-border p-4">
-      <div className="relative flex flex-col gap-2">
+      <div className="relative flex flex-col gap-4">
         <TokenRow side="from" label="From" />
         <TokenRow side="to" label="To" />
         <div className="absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 items-center justify-center">
@@ -18,13 +38,14 @@ export function SwapPanel() {
       </div>
       <button
         type="button"
-        onClick={() => {}}
-        disabled={sameToken}
+        onClick={onClick}
+        disabled={disabled}
         title={sameToken ? "Pick a different token on one side" : undefined}
-        className="mt-4 w-full rounded-lg bg-accent px-4 py-2.5 font-medium text-background text-sm transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-fg disabled:hover:bg-muted"
+        className="mt-4 w-full rounded-lg bg-accent-buy px-4 py-2.5 font-medium text-background text-sm transition-colors hover:bg-accent-buy-hover disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-fg disabled:hover:bg-muted"
       >
-        {sameToken ? "Pick a different token" : "Swap"}
+        {label}
       </button>
+      <WalletPickerDialog />
     </div>
   );
 }

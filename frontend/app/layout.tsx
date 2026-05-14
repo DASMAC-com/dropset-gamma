@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { Providers } from "@/lib/providers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -107,9 +108,11 @@ export default function RootLayout({
           // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON.stringify of a static object — safe and the canonical Next.js pattern for JSON-LD.
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <Providers>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );
