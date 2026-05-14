@@ -10,7 +10,7 @@ export type Stablecoin = {
 };
 export type CurrencyEntry = {
   name: string;
-  flag: string;
+  flag?: string;
   anchorCca2: string;
   stablecoins: Stablecoin[];
 };
@@ -33,8 +33,13 @@ export const defaultStablecoin = (code: IsoCurrencyCode): string =>
 export const currencyName = (code: IsoCurrencyCode): string =>
   CURRENCIES[code].name;
 
+const deriveFlag = (code: string): string =>
+  String.fromCodePoint(
+    ...[...code.slice(0, 2)].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65),
+  );
+
 export const currencyFlag = (code: IsoCurrencyCode): string =>
-  CURRENCIES[code].flag;
+  CURRENCIES[code].flag ?? deriveFlag(code);
 
 export const currencyAnchor = (code: IsoCurrencyCode): string =>
   CURRENCIES[code].anchorCca2;
