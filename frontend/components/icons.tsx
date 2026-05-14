@@ -7,6 +7,7 @@ import {
   Check as RawCheck,
   ChevronDown as RawChevronDown,
   Compass as RawCompass,
+  Copy as RawCopy,
   Crosshair as RawCrosshair,
   ExternalLink as RawExternalLink,
   Flag as RawFlag,
@@ -36,6 +37,7 @@ export const ArrowUpDown = safe(RawArrowUpDown);
 export const Check = safe(RawCheck);
 export const ChevronDown = safe(RawChevronDown);
 export const Compass = safe(RawCompass);
+export const Copy = safe(RawCopy);
 export const Crosshair = safe(RawCrosshair);
 export const ExternalLink = safe(RawExternalLink);
 export const Flag = safe(RawFlag);

@@ -8,20 +8,24 @@ import { ArrowUpDown } from "./icons";
 
 export function SwapArrowButton() {
   const [hovering, setHovering] = useState(false);
+  const [eventSpins, setEventSpins] = useState(0);
   const swapSides = useSwapStore((s) => s.swapSides);
-  useAppEvent("swapSides", swapSides);
+  useAppEvent("swapSides", () => {
+    swapSides();
+    setEventSpins((n) => n + 1);
+  });
   return (
     <motion.button
       type="button"
       onClick={swapSides}
       onHoverStart={() => setHovering(true)}
       onHoverEnd={() => setHovering(false)}
-      animate={hovering ? { rotate: 540 } : { rotate: 0 }}
+      animate={{ rotate: eventSpins * 540 + (hovering ? 540 : 0) }}
       transition={{ type: "spring", stiffness: 800, damping: 70 }}
-      className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-muted-fg shadow-sm transition-colors hover:border-accent hover:text-accent"
+      className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background text-muted-fg shadow-sm transition-colors hover:border-accent hover:text-accent"
       aria-label="Swap sell and buy sides"
     >
-      <ArrowUpDown size={15} strokeWidth={2} />
+      <ArrowUpDown size={19} strokeWidth={2} />
     </motion.button>
   );
 }

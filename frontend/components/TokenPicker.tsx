@@ -10,12 +10,10 @@ import {
   tokenIconUrl,
 } from "@/lib/currencies";
 import { useAppEvent } from "@/lib/events";
+import { explorerAddressUrl } from "@/lib/explorer";
 import { type Side, useSwapStore } from "@/lib/store";
 import { CurrencyGroupHeader } from "./CurrencyGroupHeader";
 import { Check, ChevronDown, ExternalLink, Search } from "./icons";
-
-const explorerUrl = (mint: string) =>
-  `https://explorer.solana.com/address/${mint}`;
 
 export function TokenPicker({ side }: { side: Side }) {
   const currency = useSwapStore((s) => s[side].currency);
@@ -38,7 +36,9 @@ export function TokenPicker({ side }: { side: Side }) {
   }, [open]);
 
   useAppEvent("openPicker", (which) => {
-    if (which === side) setOpen(true);
+    if (which !== side) return;
+    setOpen(true);
+    setActiveSide(side);
   });
 
   const isBlocked = (cur: IsoCurrencyCode, sym: string) =>
@@ -182,7 +182,7 @@ export function TokenPicker({ side }: { side: Side }) {
           )}
         </button>
         <a
-          href={explorerUrl(s.mint)}
+          href={explorerAddressUrl(s.mint)}
           target="_blank"
           rel="noopener noreferrer"
           title={`View ${s.symbol} on Solana Explorer`}
@@ -210,7 +210,13 @@ export function TokenPicker({ side }: { side: Side }) {
         if (o) setActiveSide(side);
       }}
     >
-      <Popover.Trigger className="flex w-fit items-center gap-2 self-start rounded-lg border border-border bg-background px-3 py-2 text-base text-foreground hover:border-accent hover:text-accent">
+      <Popover.Trigger
+        className={`flex w-fit items-center gap-2 self-start rounded-lg border border-border bg-background px-3 py-2 text-base text-foreground ${
+          side === "to"
+            ? "hover:border-accent-buy hover:text-accent-buy"
+            : "hover:border-accent hover:text-accent"
+        }`}
+      >
         {/* biome-ignore lint/performance/noImgElement: small static icon, no optimization needed */}
         <img
           src={tokenIconUrl(stablecoin)}

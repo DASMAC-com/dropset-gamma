@@ -1,8 +1,9 @@
 // cspell:word darkreader
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { Providers } from "@/lib/providers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -52,13 +53,16 @@ const jsonLd = {
   ],
 };
 
+export const viewport: Viewport = {
+  themeColor: "#0a0a0a",
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(url),
   title,
   description,
   applicationName: "Dropset",
   appleWebApp: { title: "Dropset" },
-  themeColor: "#0a0a0a",
   icons: {
     icon: "/favicon.png",
     apple: "/favicon.png",
@@ -107,9 +111,11 @@ export default function RootLayout({
           // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON.stringify of a static object — safe and the canonical Next.js pattern for JSON-LD.
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <Providers>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

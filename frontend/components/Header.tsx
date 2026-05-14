@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { emit } from "@/lib/events";
 import { Keyboard } from "./icons";
+import { WalletButton } from "./WalletButton";
 
 export function Header() {
   return (
@@ -11,7 +12,8 @@ export function Header() {
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-6">
         <Link
           href="/"
-          className="flex shrink-0 items-center gap-2 font-semibold text-base text-foreground no-underline"
+          aria-label="Dropset"
+          className="flex shrink-0 items-center no-underline"
         >
           <Image
             src="/favicon.png"
@@ -21,7 +23,6 @@ export function Header() {
             priority
             suppressHydrationWarning
           />
-          Dropset
         </Link>
         <nav className="flex items-center gap-2">
           <span className="rounded-md bg-muted px-3 py-1.5 text-sm text-foreground">
@@ -54,6 +55,7 @@ export function Header() {
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
           </svg>
         </a>
+        <WalletButton />
       </div>
     </header>
   );
