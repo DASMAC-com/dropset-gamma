@@ -3,17 +3,14 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { resolveTokenSlug } from "@/lib/currencies";
-import {
-  DEFAULT_FROM_STABLECOIN,
-  DEFAULT_TO_STABLECOIN,
-  useSwapStore,
-} from "@/lib/store";
+import { useSwapStore } from "@/lib/store";
 
 // Headless component that binds the swap store's from/to selection to the URL:
 //   - On mount, reads `?from=` and `?to=` and applies any resolvable slugs.
 //   - After hydration, watches the selected stablecoin symbols and writes the
 //     canonical `?from=<sym>&to=<sym>` form back to the address bar via
-//     history.replaceState — but leaves a pristine `/` visit alone.
+//     history.replaceState, including on first load with default tokens so the
+//     URL is always shareable.
 export function UrlSync() {
   const searchParams = useSearchParams();
   const setToken = useSwapStore((s) => s.setToken);
@@ -34,10 +31,6 @@ export function UrlSync() {
   useEffect(() => {
     if (!hydratedRef.current) return;
     const params = new URLSearchParams(window.location.search);
-    const urlHasSlugs = params.has("from") || params.has("to");
-    const isDefault =
-      fromSym === DEFAULT_FROM_STABLECOIN && toSym === DEFAULT_TO_STABLECOIN;
-    if (isDefault && !urlHasSlugs) return;
     if (params.get("from") === fromSym && params.get("to") === toSym) return;
     params.set("from", fromSym);
     params.set("to", toSym);
