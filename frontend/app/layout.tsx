@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { TermsOfUseGate } from "@/components/TermsOfUseGate";
 import { Providers } from "@/lib/providers";
 import "./globals.css";
 
@@ -115,6 +116,7 @@ export default function RootLayout({
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
+          <TermsOfUseGate />
         </Providers>
       </body>
     </html>
