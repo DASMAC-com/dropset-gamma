@@ -161,7 +161,7 @@ function SwapPickerCell({
       type="button"
       onClick={() => pickToken(side, code, symbol)}
       title={`Use ${symbol} as your ${label.toLowerCase()} token`}
-      className="rounded border border-border bg-background px-2 py-1 font-medium text-muted-fg text-xs transition-colors hover:border-accent hover:text-accent"
+      className="rounded border border-border bg-background px-2 py-1 font-medium text-foreground text-xs transition-colors hover:border-accent hover:text-accent"
     >
       {label}
     </button>
@@ -215,7 +215,7 @@ function StablecoinRow({
           href={s.issuer.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-start gap-1 text-muted-fg hover:text-accent"
+          className="inline-flex items-start gap-1 text-foreground hover:text-accent"
         >
           <span>{s.name}</span>
           <ExternalLink size={10} className="mt-1.5 shrink-0" />
@@ -223,7 +223,7 @@ function StablecoinRow({
       </td>
       <td className="px-3 py-2 align-top">
         <div className="flex items-start gap-1">
-          <span className="whitespace-nowrap font-mono text-muted-fg text-xs">
+          <span className="whitespace-nowrap font-mono text-foreground text-xs">
             {s.mint}
           </span>
           <CopyButton value={s.mint} label="mint address" />
@@ -256,7 +256,7 @@ function StablecoinRow({
               href={xHref(s.issuer.socials.x)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-muted-fg hover:text-accent"
+              className="inline-flex items-center gap-1 text-foreground hover:text-accent"
             >
               @{s.issuer.socials.x}
               <ExternalLink size={10} />
@@ -272,7 +272,7 @@ function StablecoinRow({
           {s.issuer.name.map((n, i) => (
             <span
               key={n}
-              className={i === 0 ? "text-muted-fg" : "text-foreground"}
+              className={i === 0 ? "text-foreground" : "text-muted-fg"}
             >
               {n}
             </span>

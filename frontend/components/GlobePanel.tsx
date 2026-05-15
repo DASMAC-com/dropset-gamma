@@ -209,10 +209,22 @@ function GlobeInner() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 480, height: 480 });
   const [clickContext, setClickContext] = useState<ClickContext | null>(null);
+  // Top edge of the globe in viewport coordinates, captured when the picker
+  // opens so the dialog renders flush with the top of the map rather than the
+  // center of the viewport.
+  const [pickerTop, setPickerTop] = useState<number | null>(null);
+  useEffect(() => {
+    if (clickContext === null) return;
+    const top = containerRef.current?.getBoundingClientRect().top;
+    if (typeof top === "number") setPickerTop(top);
+  }, [clickContext]);
   const [spinning, setSpinning] = useState(true);
   const [showFlags, setShowFlags] = useState(false);
   const [altitude, setAltitude] = useState(DEFAULT_POV.altitude);
   const [globeReady, setGlobeReady] = useState(false);
+  // Gate visibility so the user never sees the lib's default POV before our
+  // pointOfView snap commits. Flipped after the snap inside the setup effect.
+  const [revealed, setRevealed] = useState(false);
   // Ref to the spinning-ring mesh so a RAF loop can mutate its rotation
   // each frame without going through React state.
   const ringRef = useRef<Mesh | null>(null);
@@ -309,6 +321,22 @@ function GlobeInner() {
     controls.minDistance = 101;
     controls.maxDistance = 600;
     globeHandle.pointOfView(DEFAULT_POV, 0);
+    // react-globe.gl's pointOfView still runs an internal d3 transition even
+    // with duration=0, so the camera glides into DEFAULT_POV.lat over a few
+    // frames. Keep the canvas hidden until the latitude has actually settled
+    // there, with a hard fallback so a stuck poll doesn't leave it invisible.
+    // (lng isn't compared — autoRotate is already moving it.)
+    let revealRaf = 0;
+    const checkSettled = () => {
+      const pov = globeHandle.pointOfView();
+      if (Math.abs(pov.lat - DEFAULT_POV.lat) < 0.5) {
+        setRevealed(true);
+        return;
+      }
+      revealRaf = requestAnimationFrame(checkSettled);
+    };
+    revealRaf = requestAnimationFrame(checkSettled);
+    const revealFallback = window.setTimeout(() => setRevealed(true), 1500);
 
     const scene = globeHandle.scene();
     // Two layers — a dense bed of faint pinpricks plus a sparser layer of
@@ -319,6 +347,8 @@ function GlobeInner() {
     ];
     for (const layer of layers) scene.add(layer);
     return () => {
+      cancelAnimationFrame(revealRaf);
+      window.clearTimeout(revealFallback);
       for (const layer of layers) {
         scene.remove(layer);
         layer.geometry.dispose();
@@ -547,142 +577,146 @@ function GlobeInner() {
       onPointerMove={onPointerMove}
       className="relative w-full overflow-hidden rounded-xl border border-border bg-[#020617]"
     >
-      <Globe
-        ref={setGlobeRef as never}
-        width={size.width}
-        height={size.height}
-        backgroundColor="#020617"
-        globeMaterial={oceanMaterial}
-        showAtmosphere={true}
-        atmosphereColor="#7dd3fc"
-        atmosphereAltitude={0.18}
-        onGlobeReady={handleGlobeReady}
-        polygonsData={WORLD_POLYGONS}
-        polygonAltitude={polygonAltitude}
-        polygonCapColor={polygonCapColor}
-        polygonSideColor={() => "rgba(0,0,0,0.2)"}
-        polygonStrokeColor={() => "rgba(255,255,255,0.18)"}
-        polygonLabel={(d: object) =>
-          `<div style="font-family: var(--font-geist-sans); font-size: 12px; padding: 4px 8px; background: rgba(0,0,0,0.7); border-radius: 4px; color: white;">${(d as CountryFeature).properties.name}</div>`
-        }
-        onPolygonClick={onPolygonClick}
-        onGlobeClick={onGlobeClick}
-        ringsData={COUNTRY_PINS}
-        ringLat={(d: object) => (d as CountryPin).lat}
-        ringLng={(d: object) => (d as CountryPin).lng}
-        ringColor={() => "rgba(167, 243, 208, 0.45)"}
-        ringMaxRadius={1.6}
-        ringPropagationSpeed={0.7}
-        ringRepeatPeriod={2200}
-        ringAltitude={0.018}
-        pointsData={pillarPins}
-        pointLat={(d: object) => (d as CountryPin).lat}
-        pointLng={(d: object) => (d as CountryPin).lng}
-        pointAltitude={PILLAR_ALTITUDE}
-        pointRadius={0.35}
-        pointResolution={12}
-        pointColor={() => BUY_TINT}
-        customLayerData={pillarPins}
-        customThreeObject={() => {
-          // Partial torus (3/4 of a full ring) so the spin is visibly
-          // rotational instead of a uniform disc.
-          const geom = new TorusGeometry(
-            GLOBE_RADIUS * 0.04,
-            GLOBE_RADIUS * 0.006,
-            8,
-            48,
-            Math.PI * 1.5,
-          );
-          const mat = new MeshBasicMaterial({ color: BUY_TINT });
-          const mesh = new Mesh(geom, mat);
-          ringRef.current = mesh;
-          return mesh;
-        }}
-        customThreeObjectUpdate={(obj: Object3D, d: object) => {
-          // Place the ring at the pillar's tip and orient its plane tangent
-          // to the globe surface (TorusGeometry's ring axis is +Z by default;
-          // lookAt(origin) makes +Z point outward, so the ring lies flat).
-          const pin = d as CountryPin;
-          const phi = ((90 - pin.lat) * Math.PI) / 180;
-          const theta = ((pin.lng + 90) * Math.PI) / 180;
-          const r = GLOBE_RADIUS * (1 + PILLAR_ALTITUDE);
-          obj.position.set(
-            -r * Math.sin(phi) * Math.cos(theta),
-            r * Math.cos(phi),
-            r * Math.sin(phi) * Math.sin(theta),
-          );
-          obj.lookAt(0, 0, 0);
-        }}
-        arcsData={arcs}
-        arcStartLat={(d: object) => (d as { startLat: number }).startLat}
-        arcStartLng={(d: object) => (d as { startLng: number }).startLng}
-        arcStartAltitude={0.018}
-        arcEndLat={(d: object) => (d as { endLat: number }).endLat}
-        arcEndLng={(d: object) => (d as { endLng: number }).endLng}
-        arcEndAltitude={0.018}
-        arcColor={() => ARC_COLOR}
-        arcStroke={0.8}
-        arcDashLength={0.4}
-        arcDashGap={0.2}
-        arcDashAnimateTime={2000}
-        // Apex altitude scales with great-circle distance (see useMemo above):
-        // close pairs get a low bow, near-antipodal pairs arch high enough to
-        // clear the globe surface instead of clipping through it.
-        arcAltitude={(d: object) => (d as { altitude: number }).altitude}
-        labelsData={
-          showFlags || altitude >= LABEL_VISIBILITY_ALTITUDE
-            ? []
-            : altitude < 0.8
-              ? COUNTRY_PINS
-              : FAR_ZOOM_PINS
-        }
-        labelLat={(d: object) => (d as CountryPin).lat}
-        labelLng={(d: object) => (d as CountryPin).lng}
-        labelText={(d: object) =>
-          // globe.gl uses the default Helvetiker typeface for labels, which
-          // doesn't include Latin Extended glyphs (é, ô, ç, etc.). Strip
-          // diacritics so names like "Saint Barthélemy" render as
-          // "Saint Barthelemy" instead of "Saint Barth?lemy".
-          (d as CountryPin).name
-            .normalize("NFKD")
-            .replace(/\p{Diacritic}/gu, "")
-        }
-        labelSize={labelSize}
-        labelDotRadius={labelSize * 0.36}
-        labelAltitude={0.018}
-        labelColor={() => "rgba(241, 245, 249, 0.95)"}
-        labelResolution={2}
-        labelIncludeDot={true}
-        onLabelClick={onLabelClick}
-        htmlElementsData={
-          showFlags ? (altitude < 0.8 ? COUNTRY_PINS : FAR_ZOOM_PINS) : []
-        }
-        htmlLat={(d: object) => (d as CountryPin).lat}
-        htmlLng={(d: object) => (d as CountryPin).lng}
-        htmlAltitude={0.018}
-        htmlElement={(d: object) => {
-          const pin = d as CountryPin;
-          const el = document.createElement("div");
-          el.textContent = cca2ToFlag(pin.cca2);
-          el.style.fontSize = `${flagFontPx}px`;
-          el.style.lineHeight = "1";
-          el.style.cursor = "pointer";
-          el.style.userSelect = "none";
-          el.style.transform = "translate(-50%, -50%)";
-          // globe.gl's HTML overlay container sets pointer-events: none so
-          // canvas interactions (rotate/zoom) still work through it; each
-          // child has to opt back in to receive its own click.
-          el.style.pointerEvents = "auto";
-          // Keep flags below the country popover (z-40) when both are visible.
-          el.style.zIndex = "1";
-          el.title = pin.name;
-          el.addEventListener("click", () => {
-            onLabelClick(pin);
-          });
-          return el;
-        }}
-        onZoom={(pov: { altitude: number }) => setAltitude(pov.altitude)}
-      />
+      <div
+        className={`transition-opacity duration-0 ${revealed ? "opacity-100" : "opacity-0"}`}
+      >
+        <Globe
+          ref={setGlobeRef as never}
+          width={size.width}
+          height={size.height}
+          backgroundColor="#020617"
+          globeMaterial={oceanMaterial}
+          showAtmosphere={true}
+          atmosphereColor="#7dd3fc"
+          atmosphereAltitude={0.18}
+          onGlobeReady={handleGlobeReady}
+          polygonsData={WORLD_POLYGONS}
+          polygonAltitude={polygonAltitude}
+          polygonCapColor={polygonCapColor}
+          polygonSideColor={() => "rgba(0,0,0,0.2)"}
+          polygonStrokeColor={() => "rgba(255,255,255,0.18)"}
+          polygonLabel={(d: object) =>
+            `<div style="font-family: var(--font-geist-sans); font-size: 12px; padding: 4px 8px; background: rgba(0,0,0,0.7); border-radius: 4px; color: white;">${(d as CountryFeature).properties.name}</div>`
+          }
+          onPolygonClick={onPolygonClick}
+          onGlobeClick={onGlobeClick}
+          ringsData={COUNTRY_PINS}
+          ringLat={(d: object) => (d as CountryPin).lat}
+          ringLng={(d: object) => (d as CountryPin).lng}
+          ringColor={() => "rgba(167, 243, 208, 0.45)"}
+          ringMaxRadius={1.6}
+          ringPropagationSpeed={0.7}
+          ringRepeatPeriod={2200}
+          ringAltitude={0.018}
+          pointsData={pillarPins}
+          pointLat={(d: object) => (d as CountryPin).lat}
+          pointLng={(d: object) => (d as CountryPin).lng}
+          pointAltitude={PILLAR_ALTITUDE}
+          pointRadius={0.35}
+          pointResolution={12}
+          pointColor={() => BUY_TINT}
+          customLayerData={pillarPins}
+          customThreeObject={() => {
+            // Partial torus (3/4 of a full ring) so the spin is visibly
+            // rotational instead of a uniform disc.
+            const geom = new TorusGeometry(
+              GLOBE_RADIUS * 0.04,
+              GLOBE_RADIUS * 0.006,
+              8,
+              48,
+              Math.PI * 1.5,
+            );
+            const mat = new MeshBasicMaterial({ color: BUY_TINT });
+            const mesh = new Mesh(geom, mat);
+            ringRef.current = mesh;
+            return mesh;
+          }}
+          customThreeObjectUpdate={(obj: Object3D, d: object) => {
+            // Place the ring at the pillar's tip and orient its plane tangent
+            // to the globe surface (TorusGeometry's ring axis is +Z by default;
+            // lookAt(origin) makes +Z point outward, so the ring lies flat).
+            const pin = d as CountryPin;
+            const phi = ((90 - pin.lat) * Math.PI) / 180;
+            const theta = ((pin.lng + 90) * Math.PI) / 180;
+            const r = GLOBE_RADIUS * (1 + PILLAR_ALTITUDE);
+            obj.position.set(
+              -r * Math.sin(phi) * Math.cos(theta),
+              r * Math.cos(phi),
+              r * Math.sin(phi) * Math.sin(theta),
+            );
+            obj.lookAt(0, 0, 0);
+          }}
+          arcsData={arcs}
+          arcStartLat={(d: object) => (d as { startLat: number }).startLat}
+          arcStartLng={(d: object) => (d as { startLng: number }).startLng}
+          arcStartAltitude={0.018}
+          arcEndLat={(d: object) => (d as { endLat: number }).endLat}
+          arcEndLng={(d: object) => (d as { endLng: number }).endLng}
+          arcEndAltitude={0.018}
+          arcColor={() => ARC_COLOR}
+          arcStroke={0.8}
+          arcDashLength={0.4}
+          arcDashGap={0.2}
+          arcDashAnimateTime={2000}
+          // Apex altitude scales with great-circle distance (see useMemo above):
+          // close pairs get a low bow, near-antipodal pairs arch high enough to
+          // clear the globe surface instead of clipping through it.
+          arcAltitude={(d: object) => (d as { altitude: number }).altitude}
+          labelsData={
+            showFlags || altitude >= LABEL_VISIBILITY_ALTITUDE
+              ? []
+              : altitude < 0.8
+                ? COUNTRY_PINS
+                : FAR_ZOOM_PINS
+          }
+          labelLat={(d: object) => (d as CountryPin).lat}
+          labelLng={(d: object) => (d as CountryPin).lng}
+          labelText={(d: object) =>
+            // globe.gl uses the default Helvetiker typeface for labels, which
+            // doesn't include Latin Extended glyphs (é, ô, ç, etc.). Strip
+            // diacritics so names like "Saint Barthélemy" render as
+            // "Saint Barthelemy" instead of "Saint Barth?lemy".
+            (d as CountryPin).name
+              .normalize("NFKD")
+              .replace(/\p{Diacritic}/gu, "")
+          }
+          labelSize={labelSize}
+          labelDotRadius={labelSize * 0.36}
+          labelAltitude={0.018}
+          labelColor={() => "rgba(241, 245, 249, 0.95)"}
+          labelResolution={2}
+          labelIncludeDot={true}
+          onLabelClick={onLabelClick}
+          htmlElementsData={
+            showFlags ? (altitude < 0.8 ? COUNTRY_PINS : FAR_ZOOM_PINS) : []
+          }
+          htmlLat={(d: object) => (d as CountryPin).lat}
+          htmlLng={(d: object) => (d as CountryPin).lng}
+          htmlAltitude={0.018}
+          htmlElement={(d: object) => {
+            const pin = d as CountryPin;
+            const el = document.createElement("div");
+            el.textContent = cca2ToFlag(pin.cca2);
+            el.style.fontSize = `${flagFontPx}px`;
+            el.style.lineHeight = "1";
+            el.style.cursor = "pointer";
+            el.style.userSelect = "none";
+            el.style.transform = "translate(-50%, -50%)";
+            // globe.gl's HTML overlay container sets pointer-events: none so
+            // canvas interactions (rotate/zoom) still work through it; each
+            // child has to opt back in to receive its own click.
+            el.style.pointerEvents = "auto";
+            // Keep flags below the country popover (z-40) when both are visible.
+            el.style.zIndex = "1";
+            el.title = pin.name;
+            el.addEventListener("click", () => {
+              onLabelClick(pin);
+            });
+            return el;
+          }}
+          onZoom={(pov: { altitude: number }) => setAltitude(pov.altitude)}
+        />
+      </div>
 
       <div className="absolute top-3 left-3 z-20 flex flex-col gap-2">
         <button
@@ -771,7 +805,19 @@ function GlobeInner() {
           <Dialog.Overlay className="fixed inset-0 z-[60] bg-background/80 backdrop-blur-2xl" />
           <Dialog.Content
             aria-describedby={undefined}
-            className="-translate-x-1/2 -translate-y-1/2 fixed top-1/2 left-1/2 z-[70] flex max-h-[calc(100vh-3rem)] w-[min(420px,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border border-border bg-background shadow-lg"
+            style={
+              pickerTop !== null
+                ? {
+                    top: pickerTop,
+                    maxHeight: `calc(100vh - ${pickerTop}px - 1rem)`,
+                  }
+                : undefined
+            }
+            className={`-translate-x-1/2 fixed left-1/2 z-[70] flex w-[min(420px,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border border-border bg-background shadow-lg ${
+              pickerTop === null
+                ? "-translate-y-1/2 top-1/2 max-h-[calc(100vh-3rem)]"
+                : ""
+            }`}
           >
             <div className="flex items-center gap-2 border-border border-b px-3 py-2">
               <Dialog.Title className="min-w-0 flex-1 truncate text-foreground text-sm">
