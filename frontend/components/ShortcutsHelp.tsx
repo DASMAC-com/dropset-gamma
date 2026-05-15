@@ -1,12 +1,15 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAppEvent } from "@/lib/events";
-import { SHORTCUTS } from "@/lib/shortcuts";
+import { shortcutsForPath } from "@/lib/shortcuts";
 import { X } from "./icons";
 
 export function ShortcutsHelp() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const shortcuts = shortcutsForPath(pathname);
 
   useAppEvent("toggleHelp", () => setOpen((v) => !v));
 
@@ -25,7 +28,7 @@ export function ShortcutsHelp() {
     // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click dismiss; Escape and the close button cover keyboard paths
     // biome-ignore lint/a11y/useKeyWithClickEvents: same — keyboard dismissal handled by Escape and the close button
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-background/70 px-4 pt-6 pb-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex items-start justify-center bg-background/70 px-4 pt-6 pb-4 backdrop-blur-sm"
       onClick={() => setOpen(false)}
     >
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: stopPropagation only — keyboard interaction happens inside the dialog content */}
@@ -53,7 +56,7 @@ export function ShortcutsHelp() {
           </button>
         </div>
         <ul className="flex flex-col gap-2">
-          {SHORTCUTS.map(({ key, description }) => (
+          {shortcuts.map(({ key, description }) => (
             <li
               key={key}
               className="flex items-center justify-between gap-3 text-sm"
@@ -66,7 +69,7 @@ export function ShortcutsHelp() {
           ))}
         </ul>
         <p className="mt-4 text-muted-fg text-xs">
-          Press <kbd className="font-mono">/</kbd> or{" "}
+          Press <kbd className="font-mono">?</kbd> or{" "}
           <kbd className="font-mono">Esc</kbd> to close.
         </p>
       </div>

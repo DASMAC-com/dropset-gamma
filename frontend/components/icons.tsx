@@ -11,6 +11,7 @@ import {
   Crosshair as RawCrosshair,
   ExternalLink as RawExternalLink,
   Flag as RawFlag,
+  HelpCircle as RawHelpCircle,
   Keyboard as RawKeyboard,
   Minus as RawMinus,
   Pause as RawPause,
@@ -42,6 +43,7 @@ export const Copy = safe(RawCopy);
 export const Crosshair = safe(RawCrosshair);
 export const ExternalLink = safe(RawExternalLink);
 export const Flag = safe(RawFlag);
+export const HelpCircle = safe(RawHelpCircle);
 export const Keyboard = safe(RawKeyboard);
 export const Minus = safe(RawMinus);
 export const Pause = safe(RawPause);

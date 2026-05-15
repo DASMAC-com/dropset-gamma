@@ -2,11 +2,18 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { emit } from "@/lib/events";
 import { Keyboard } from "./icons";
 import { WalletButton } from "./WalletButton";
 
+const navClass = (active: boolean) =>
+  active
+    ? "inline-flex h-9 items-center rounded-md border border-muted-fg/40 bg-foreground/[0.07] px-3 font-medium text-foreground text-sm no-underline"
+    : "inline-flex h-9 items-center rounded-md px-3 font-medium text-muted-fg text-sm no-underline hover:bg-muted hover:text-foreground";
+
 export function Header() {
+  const pathname = usePathname();
   return (
     <header className="sticky top-0 z-50 border-border border-b bg-background">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-6">
@@ -25,15 +32,26 @@ export function Header() {
           />
         </Link>
         <nav className="flex items-center gap-2">
-          <span className="inline-flex h-9 items-center rounded-md border border-muted-fg/40 bg-foreground/[0.07] px-3 font-medium text-foreground text-sm">
+          <Link
+            href="/swap"
+            aria-current={pathname === "/swap" ? "page" : undefined}
+            className={navClass(pathname === "/swap")}
+          >
             Swap
-          </span>
+          </Link>
+          <Link
+            href="/currencies"
+            aria-current={pathname === "/currencies" ? "page" : undefined}
+            className={navClass(pathname === "/currencies")}
+          >
+            Currencies
+          </Link>
         </nav>
         <button
           type="button"
           onClick={() => emit("toggleHelp")}
           aria-label="Show keyboard shortcuts"
-          title="Keyboard shortcuts (/)"
+          title="Keyboard shortcuts (?)"
           className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground hover:bg-muted"
         >
           <Keyboard size={18} />

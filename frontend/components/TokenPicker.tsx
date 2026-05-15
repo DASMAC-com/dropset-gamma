@@ -4,16 +4,18 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useEffect, useRef, useState } from "react";
 import {
   CURRENCIES,
+  currencyName,
   type IsoCurrencyCode,
   type Stablecoin,
   SUPPORTED,
   tokenIconUrl,
 } from "@/lib/currencies";
 import { useAppEvent } from "@/lib/events";
-import { explorerAddressUrl } from "@/lib/explorer";
 import { type Side, useSwapStore } from "@/lib/store";
 import { CurrencyGroupHeader } from "./CurrencyGroupHeader";
-import { Check, ChevronDown, ExternalLink, Search, X } from "./icons";
+import { ChevronDown, Search, X } from "./icons";
+import { TokenInfoLink } from "./TokenInfoLink";
+import { TokenMintActions } from "./TokenMintActions";
 
 export function TokenPicker({ side }: { side: Side }) {
   const currency = useSwapStore((s) => s[side].currency);
@@ -26,7 +28,6 @@ export function TokenPicker({ side }: { side: Side }) {
 
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [copiedSymbol, setCopiedSymbol] = useState<string | null>(null);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const searchRef = useRef<HTMLInputElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -51,7 +52,7 @@ export function TokenPicker({ side }: { side: Side }) {
     s.name.toLowerCase().includes(q) ||
     s.mint.toLowerCase().includes(q) ||
     code.toLowerCase().includes(q) ||
-    CURRENCIES[code].name.toLowerCase().includes(q);
+    currencyName(code).toLowerCase().includes(q);
 
   const grouped = SUPPORTED.map((code) => ({
     code,
@@ -113,19 +114,6 @@ export function TokenPicker({ side }: { side: Side }) {
     }
   };
 
-  const copyMint = async (sym: string, mint: string) => {
-    try {
-      await navigator.clipboard.writeText(mint);
-      setCopiedSymbol(sym);
-      setTimeout(
-        () => setCopiedSymbol((cur) => (cur === sym ? null : cur)),
-        1500,
-      );
-    } catch {
-      // clipboard API unavailable — silently ignore
-    }
-  };
-
   const renderStableRow = (
     code: IsoCurrencyCode,
     s: Stablecoin,
@@ -133,7 +121,6 @@ export function TokenPicker({ side }: { side: Side }) {
   ) => {
     const blocked = isBlocked(code, s.symbol);
     const selected = code === currency && s.symbol === stablecoin;
-    const copied = copiedSymbol === s.symbol;
     const active = selected || highlighted;
     return (
       <div
@@ -164,32 +151,8 @@ export function TokenPicker({ side }: { side: Side }) {
             )}
           </span>
         </button>
-        <button
-          type="button"
-          onClick={() => copyMint(s.symbol, s.mint)}
-          title={copied ? "Copied!" : "Copy mint address"}
-          className="flex shrink-0 items-center gap-1 rounded px-1.5 py-1 font-mono text-muted-fg text-xs hover:bg-muted hover:text-accent"
-        >
-          {copied ? (
-            <>
-              <Check size={10} />
-              copied
-            </>
-          ) : (
-            <>
-              {s.mint.slice(0, 4)}…{s.mint.slice(-4)}
-            </>
-          )}
-        </button>
-        <a
-          href={explorerAddressUrl(s.mint)}
-          target="_blank"
-          rel="noopener noreferrer"
-          title={`View ${s.symbol} on Solana Explorer`}
-          className="mr-1 flex shrink-0 items-center rounded p-1 text-muted-fg hover:bg-muted hover:text-accent"
-        >
-          <ExternalLink size={12} />
-        </a>
+        <TokenMintActions symbol={s.symbol} mint={s.mint} />
+        <TokenInfoLink symbol={s.symbol} className="mr-1" />
       </div>
     );
   };
@@ -211,10 +174,10 @@ export function TokenPicker({ side }: { side: Side }) {
       }}
     >
       <Dialog.Trigger
-        className={`flex w-fit items-center gap-2 self-center rounded-lg border border-border bg-background px-4 py-2.5 text-xl text-foreground ${
+        className={`flex w-fit items-center gap-2 self-center rounded-lg border border-border bg-background px-4 py-2.5 text-xl text-foreground outline-none ${
           side === "to"
-            ? "hover:border-accent-buy hover:text-accent-buy"
-            : "hover:border-accent hover:text-accent"
+            ? "hover:border-accent-buy hover:text-accent-buy focus-visible:border-accent-buy focus-visible:text-accent-buy"
+            : "hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent"
         }`}
       >
         {/* biome-ignore lint/performance/noImgElement: small static icon, no optimization needed */}
