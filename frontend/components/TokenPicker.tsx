@@ -14,7 +14,7 @@ import { useAppEvent } from "@/lib/events";
 import { explorerAddressUrl } from "@/lib/explorer";
 import { type Side, useSwapStore } from "@/lib/store";
 import { CurrencyGroupHeader } from "./CurrencyGroupHeader";
-import { Check, ChevronDown, ExternalLink, Search, X } from "./icons";
+import { Check, ChevronDown, ExternalLink, HelpCircle, Search, X } from "./icons";
 
 export function TokenPicker({ side }: { side: Side }) {
   const currency = useSwapStore((s) => s[side].currency);
@@ -187,9 +187,18 @@ export function TokenPicker({ side }: { side: Side }) {
           target="_blank"
           rel="noopener noreferrer"
           title={`View ${s.symbol} on Solana Explorer`}
-          className="mr-1 flex shrink-0 items-center rounded p-1 text-muted-fg hover:bg-muted hover:text-accent"
+          className="flex shrink-0 items-center rounded p-1 text-muted-fg hover:bg-muted hover:text-accent"
         >
           <ExternalLink size={12} />
+        </a>
+        <a
+          href={`/currencies#${s.symbol.toLowerCase()}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={`More info about ${s.symbol}`}
+          className="mr-1 flex shrink-0 items-center rounded p-1 text-muted-fg hover:bg-muted hover:text-accent"
+        >
+          <HelpCircle size={12} />
         </a>
       </div>
     );
