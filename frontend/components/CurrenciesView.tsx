@@ -214,15 +214,25 @@ function CurrenciesInner() {
           </button>
         )}
       </div>
-      <div className="overflow-x-auto rounded-lg border border-border">
+      <div className="rounded-lg border border-border">
         <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="sticky top-14 z-10 bg-muted text-muted-fg text-xs uppercase">
+          <thead className="text-muted-fg text-xs uppercase">
             <tr>
-              <th className="px-3 py-2 font-medium">Token</th>
-              <th className="px-3 py-2 font-medium">Name</th>
-              <th className="px-3 py-2 font-medium">Mint Address</th>
-              <th className="px-3 py-2 font-medium">X</th>
-              <th className="px-3 py-2 font-medium">Issuer(s)</th>
+              <th className="sticky top-14 z-20 bg-muted px-3 py-2 font-medium">
+                Token
+              </th>
+              <th className="sticky top-14 z-20 bg-muted px-3 py-2 font-medium">
+                Name
+              </th>
+              <th className="sticky top-14 z-20 bg-muted px-3 py-2 font-medium">
+                Mint Address
+              </th>
+              <th className="sticky top-14 z-20 bg-muted px-3 py-2 font-medium">
+                X
+              </th>
+              <th className="sticky top-14 z-20 bg-muted px-3 py-2 font-medium">
+                Issuer(s)
+              </th>
             </tr>
           </thead>
           <tbody>
