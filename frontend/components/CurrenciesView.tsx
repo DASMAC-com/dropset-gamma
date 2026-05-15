@@ -229,8 +229,7 @@ function StablecoinRow({
 
 function CurrenciesInner() {
   const searchParams = useSearchParams();
-  const initialQuery = searchParams.get("q") ?? "";
-  const [query, setQuery] = useState(initialQuery);
+  const [query, setQuery] = useState(searchParams.get("q") ?? "");
 
   const q = query.trim().toLowerCase();
   const grouped = useMemo(
@@ -248,31 +247,38 @@ function CurrenciesInner() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 pt-3 pb-16">
-      <p className="mb-2 text-muted-fg text-xs">
-        <span className="text-foreground">{stats.represented}</span> of{" "}
-        <span className="text-foreground">{stats.total}</span> currencies
-        represented on Solana ·{" "}
-        <span className="text-foreground">{stats.missing}</span> not yet listed
-      </p>
-      <div className="mb-2 flex items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2">
-        <Search size={14} className="shrink-0 text-muted-fg" />
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by symbol, name, issuer, currency, or mint…"
-          className="min-w-0 flex-1 bg-transparent text-foreground text-sm outline-none placeholder:text-muted-fg"
-        />
-        {query && (
-          <button
-            type="button"
-            onClick={() => setQuery("")}
-            aria-label="Clear search"
-            className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-fg hover:bg-background hover:text-foreground"
-          >
-            <X size={14} />
-          </button>
-        )}
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="flex h-9 w-56 items-center gap-2 rounded-md border border-border bg-muted px-3">
+          <Search size={14} className="shrink-0 text-muted-fg" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search currencies…"
+            className="min-w-0 flex-1 bg-transparent text-foreground text-sm outline-none placeholder:text-muted-fg"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              aria-label="Clear search"
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-fg hover:bg-background hover:text-foreground"
+            >
+              <X size={14} />
+            </button>
+          )}
+        </div>
+        <div className="flex flex-col text-right text-muted-fg text-xs">
+          <p>
+            <span className="text-foreground">{stats.represented}</span> of{" "}
+            <span className="text-foreground">{stats.total}</span> currencies
+            represented on Solana
+          </p>
+          <p>
+            <span className="text-foreground">{stats.missing}</span> not yet
+            listed
+          </p>
+        </div>
       </div>
       <div className="rounded-lg border border-border">
         <table className="w-full min-w-[720px] text-left text-sm">
