@@ -51,7 +51,6 @@ const LAND_UNCOVERED = "#1e293b"; // slate-800 — no supported currency
 const OCEAN_COLOR = 0x0b1726;
 const ARC_COLOR = "#a7f3d0"; // emerald-200 — bright, ties the cool palette together
 
-
 // Height of the "same-country" pillar (a vertical cylinder over the shared
 // anchor) and the spinning ring that sits on top of it.
 const PILLAR_ALTITUDE = 0.18;
@@ -654,11 +653,7 @@ function GlobeInner() {
         labelIncludeDot={true}
         onLabelClick={onLabelClick}
         htmlElementsData={
-          showFlags
-            ? altitude < 0.8
-              ? COUNTRY_PINS
-              : FAR_ZOOM_PINS
-            : []
+          showFlags ? (altitude < 0.8 ? COUNTRY_PINS : FAR_ZOOM_PINS) : []
         }
         htmlLat={(d: object) => (d as CountryPin).lat}
         htmlLng={(d: object) => (d as CountryPin).lng}
