@@ -209,10 +209,22 @@ function GlobeInner() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 480, height: 480 });
   const [clickContext, setClickContext] = useState<ClickContext | null>(null);
+  // Top edge of the globe in viewport coordinates, captured when the picker
+  // opens so the dialog renders flush with the top of the map rather than the
+  // center of the viewport.
+  const [pickerTop, setPickerTop] = useState<number | null>(null);
+  useEffect(() => {
+    if (clickContext === null) return;
+    const top = containerRef.current?.getBoundingClientRect().top;
+    if (typeof top === "number") setPickerTop(top);
+  }, [clickContext]);
   const [spinning, setSpinning] = useState(true);
   const [showFlags, setShowFlags] = useState(false);
   const [altitude, setAltitude] = useState(DEFAULT_POV.altitude);
   const [globeReady, setGlobeReady] = useState(false);
+  // Gate visibility so the user never sees the lib's default POV before our
+  // pointOfView snap commits. Flipped after the snap inside the setup effect.
+  const [revealed, setRevealed] = useState(false);
   // Ref to the spinning-ring mesh so a RAF loop can mutate its rotation
   // each frame without going through React state.
   const ringRef = useRef<Mesh | null>(null);
@@ -309,6 +321,9 @@ function GlobeInner() {
     controls.minDistance = 101;
     controls.maxDistance = 600;
     globeHandle.pointOfView(DEFAULT_POV, 0);
+    // Reveal on the next frame so the POV snap has committed to canvas before
+    // the user sees anything.
+    const revealRaf = requestAnimationFrame(() => setRevealed(true));
 
     const scene = globeHandle.scene();
     // Two layers — a dense bed of faint pinpricks plus a sparser layer of
@@ -319,6 +334,7 @@ function GlobeInner() {
     ];
     for (const layer of layers) scene.add(layer);
     return () => {
+      cancelAnimationFrame(revealRaf);
       for (const layer of layers) {
         scene.remove(layer);
         layer.geometry.dispose();
@@ -547,6 +563,9 @@ function GlobeInner() {
       onPointerMove={onPointerMove}
       className="relative w-full overflow-hidden rounded-xl border border-border bg-[#020617]"
     >
+      <div
+        className={`transition-opacity duration-200 ${revealed ? "opacity-100" : "opacity-0"}`}
+      >
       <Globe
         ref={setGlobeRef as never}
         width={size.width}
@@ -683,6 +702,7 @@ function GlobeInner() {
         }}
         onZoom={(pov: { altitude: number }) => setAltitude(pov.altitude)}
       />
+      </div>
 
       <div className="absolute top-3 left-3 z-20 flex flex-col gap-2">
         <button
@@ -771,7 +791,17 @@ function GlobeInner() {
           <Dialog.Overlay className="fixed inset-0 z-[60] bg-background/80 backdrop-blur-2xl" />
           <Dialog.Content
             aria-describedby={undefined}
-            className="-translate-x-1/2 -translate-y-1/2 fixed top-1/2 left-1/2 z-[70] flex max-h-[calc(100vh-3rem)] w-[min(420px,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border border-border bg-background shadow-lg"
+            style={
+              pickerTop !== null
+                ? {
+                    top: pickerTop,
+                    maxHeight: `calc(100vh - ${pickerTop}px - 1rem)`,
+                  }
+                : undefined
+            }
+            className={`-translate-x-1/2 fixed left-1/2 z-[70] flex w-[min(420px,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border border-border bg-background shadow-lg ${
+              pickerTop === null ? "-translate-y-1/2 top-1/2 max-h-[calc(100vh-3rem)]" : ""
+            }`}
           >
             <div className="flex items-center gap-2 border-border border-b px-3 py-2">
               <Dialog.Title className="min-w-0 flex-1 truncate text-foreground text-sm">
