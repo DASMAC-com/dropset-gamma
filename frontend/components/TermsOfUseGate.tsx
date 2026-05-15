@@ -39,7 +39,10 @@ export function TermsOfUseGate() {
     >
       <div className="-translate-x-1/2 fixed top-6 left-1/2 z-[70] flex w-[min(420px,calc(100vw-2rem))] flex-col rounded-xl border border-border bg-background shadow-lg">
         <div className="border-border border-b px-5 py-3">
-          <h2 id="tos-title" className="font-semibold text-foreground text-base">
+          <h2
+            id="tos-title"
+            className="font-semibold text-foreground text-base"
+          >
             Terms of Use
           </h2>
         </div>
@@ -48,10 +51,10 @@ export function TermsOfUseGate() {
             This website-hosted user interface (this &ldquo;Interface&rdquo;) is
             an open source frontend software portal to the Dropset protocol, a
             decentralized and community-driven collection of blockchain-enabled
-            smart contracts and tools (the &ldquo;Dropset Protocol&rdquo;).
-            This Interface and the Dropset Protocol are made available by
-            DASMAC, however all transactions conducted on the protocol are run
-            by related permissionless smart contracts. As the Interface is
+            smart contracts and tools (the &ldquo;Dropset Protocol&rdquo;). This
+            Interface and the Dropset Protocol are made available by DASMAC,
+            however all transactions conducted on the protocol are run by
+            related permissionless smart contracts. As the Interface is
             open-sourced and the Dropset Protocol and its related smart
             contracts are accessible by any user, entity or third party, there
             are a number of third party web and mobile user-interfaces that
@@ -60,33 +63,33 @@ export function TermsOfUseGate() {
           <p>
             THIS INTERFACE AND THE DROPSET PROTOCOL ARE PROVIDED &ldquo;AS
             IS&rdquo;, AT YOUR OWN RISK, AND WITHOUT WARRANTIES OF ANY KIND.
-            DASMAC does not provide, own, or control the Dropset Protocol or
-            any transactions conducted on the protocol or via related smart
+            DASMAC does not provide, own, or control the Dropset Protocol or any
+            transactions conducted on the protocol or via related smart
             contracts. By using or accessing this Interface or the Dropset
-            Protocol and related smart contracts, you agree that no developer
-            or entity involved in creating, deploying or maintaining this
-            Interface or the Dropset Protocol will be liable for any claims or
-            damages whatsoever associated with your use, inability to use, or
-            your interaction with other users of, this Interface or the
-            Dropset Protocol, including any direct, indirect, incidental,
-            special, exemplary, punitive or consequential damages, or loss of
-            profits, digital assets, tokens, or anything else of value.
+            Protocol and related smart contracts, you agree that no developer or
+            entity involved in creating, deploying or maintaining this Interface
+            or the Dropset Protocol will be liable for any claims or damages
+            whatsoever associated with your use, inability to use, or your
+            interaction with other users of, this Interface or the Dropset
+            Protocol, including any direct, indirect, incidental, special,
+            exemplary, punitive or consequential damages, or loss of profits,
+            digital assets, tokens, or anything else of value.
           </p>
           <p>
             By using or accessing this Interface, the Dropset Protocol, or
-            related smart contracts, you represent that you are not located
-            in, incorporated or established in, or a citizen or resident of
-            any jurisdiction that is subject to comprehensive sanctions or
-            trade restrictions administered by the United States, including
-            but not limited to Cuba, Iran, North Korea, Syria, the Crimea,
-            Donetsk, and Luhansk regions, or any other jurisdiction in which
-            accessing or using the Dropset Protocol is prohibited under United
-            States law (the &ldquo;Prohibited Jurisdictions&rdquo;). You also
-            represent that you are not subject to sanctions or otherwise
-            designated on any list of prohibited or restricted parties or
-            excluded or denied persons, including but not limited to the lists
-            maintained by the United States&rsquo; Department of
-            Treasury&rsquo;s Office of Foreign Assets Control.
+            related smart contracts, you represent that you are not located in,
+            incorporated or established in, or a citizen or resident of any
+            jurisdiction that is subject to comprehensive sanctions or trade
+            restrictions administered by the United States, including but not
+            limited to Cuba, Iran, North Korea, Syria, the Crimea, Donetsk, and
+            Luhansk regions, or any other jurisdiction in which accessing or
+            using the Dropset Protocol is prohibited under United States law
+            (the &ldquo;Prohibited Jurisdictions&rdquo;). You also represent
+            that you are not subject to sanctions or otherwise designated on any
+            list of prohibited or restricted parties or excluded or denied
+            persons, including but not limited to the lists maintained by the
+            United States&rsquo; Department of Treasury&rsquo;s Office of
+            Foreign Assets Control.
           </p>
         </div>
         <div className="border-border border-t px-5 py-3">
