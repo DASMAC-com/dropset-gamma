@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { CopyButton } from "@/components/CopyButton";
 import { ExternalLink, HelpCircle, Search, X } from "@/components/icons";
 import {
@@ -17,20 +17,62 @@ import { explorerAddressUrl } from "@/lib/explorer";
 
 const COLSPAN = 5;
 
-const CURRENCY_TINT: Record<string, { chip: string; border: string }> = {
-  USD: { chip: "bg-emerald-500/15", border: "border-emerald-500/60" },
-  EUR: { chip: "bg-sky-500/15", border: "border-sky-500/60" },
-  GBP: { chip: "bg-indigo-500/15", border: "border-indigo-500/60" },
-  JPY: { chip: "bg-rose-500/15", border: "border-rose-500/60" },
-  AUD: { chip: "bg-amber-500/15", border: "border-amber-500/60" },
-  BRL: { chip: "bg-green-500/15", border: "border-green-500/60" },
-  CHF: { chip: "bg-red-500/15", border: "border-red-500/60" },
-  MXN: { chip: "bg-orange-500/15", border: "border-orange-500/60" },
-  NGN: { chip: "bg-teal-500/15", border: "border-teal-500/60" },
-  ZAR: { chip: "bg-fuchsia-500/15", border: "border-fuchsia-500/60" },
+// Cache of dominant color (RGB triplet) computed from a flag emoji rendered to
+// a canvas. Module-level so it persists across re-renders / search filters.
+type Rgb = [number, number, number];
+const flagColorCache = new Map<string, Rgb | null>();
+
+const computeFlagColor = (emoji: string): Rgb | null => {
+  if (typeof document === "undefined") return null;
+  const size = 24;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return null;
+  ctx.clearRect(0, 0, size, size);
+  ctx.font = `${size}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+  ctx.textBaseline = "top";
+  ctx.fillText(emoji, 0, 0);
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  let n = 0;
+  const { data } = ctx.getImageData(0, 0, size, size);
+  for (let i = 0; i < data.length; i += 4) {
+    const pa = data[i + 3];
+    if (pa < 200) continue;
+    const pr = data[i];
+    const pg = data[i + 1];
+    const pb = data[i + 2];
+    const max = Math.max(pr, pg, pb);
+    const min = Math.min(pr, pg, pb);
+    const sat = max === 0 ? 0 : (max - min) / max;
+    // Drop near-grey, very dark, and very bright pixels — keeps the
+    // saturated brand color and avoids skewing toward white/black/grey bands.
+    if (sat < 0.3) continue;
+    if (max < 60 || max > 245) continue;
+    r += pr;
+    g += pg;
+    b += pb;
+    n++;
+  }
+  if (n === 0) return null;
+  return [(r / n) | 0, (g / n) | 0, (b / n) | 0];
 };
-const tintFor = (code: IsoCurrencyCode) =>
-  CURRENCY_TINT[code] ?? { chip: "bg-muted", border: "border-border" };
+
+const useFlagColor = (code: IsoCurrencyCode, emoji: string): Rgb | null => {
+  const [color, setColor] = useState<Rgb | null>(() =>
+    flagColorCache.has(code) ? (flagColorCache.get(code) ?? null) : null,
+  );
+  useEffect(() => {
+    if (flagColorCache.has(code)) return;
+    const c = computeFlagColor(emoji);
+    flagColorCache.set(code, c);
+    setColor(c);
+  }, [code, emoji]);
+  return color;
+};
 
 const xHref = (handle: string) => `https://x.com/${handle}`;
 
@@ -47,19 +89,28 @@ const matches = (s: Stablecoin, code: IsoCurrencyCode, q: string): boolean => {
 };
 
 function CurrencyHeaderRow({ code }: { code: IsoCurrencyCode }) {
-  const tint = tintFor(code);
+  const flag = currencyFlag(code);
+  const color = useFlagColor(code, flag);
+  const borderStyle = color
+    ? { borderBottomColor: `rgb(${color[0]} ${color[1]} ${color[2]} / 0.6)` }
+    : undefined;
+  const chipStyle = color
+    ? { backgroundColor: `rgb(${color[0]} ${color[1]} ${color[2]} / 0.15)` }
+    : undefined;
   return (
     <tr className="bg-background">
       <td
         colSpan={COLSPAN}
-        className={`border-b ${tint.border} px-3 pt-6 pb-2`}
+        className="border-b border-border px-3 pt-6 pb-2"
+        style={borderStyle}
       >
         <div className="flex items-center gap-2 text-muted-fg text-xs uppercase tracking-wide">
           <span
             aria-hidden
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-2xl leading-none ${tint.chip}`}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-2xl leading-none"
+            style={chipStyle}
           >
-            {currencyFlag(code)}
+            {flag}
           </span>
           <span className="font-semibold text-foreground text-sm">{code}</span>
           <span className="text-muted-fg">·</span>
