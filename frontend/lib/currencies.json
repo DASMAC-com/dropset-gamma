@@ -9,7 +9,7 @@
         "decimals": 6,
         "icon": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
         "issuer": {
-          "name": "Circle",
+          "name": ["Circle"],
           "url": "https://www.circle.com/usdc",
           "socials": { "x": "USDC" }
         }
@@ -22,7 +22,7 @@
         "decimals": 6,
         "icon": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB/logo.svg",
         "issuer": {
-          "name": "Tether",
+          "name": ["Tether"],
           "url": "https://tether.to/transparency/",
           "socials": { "x": "tether" }
         }
@@ -35,7 +35,7 @@
         "decimals": 6,
         "icon": "https://424565.fs1.hubspotusercontent-na1.net/hubfs/424565/GDN-USDG-Token-512x512.png",
         "issuer": {
-          "name": "Paxos Digital Singapore / Global Dollar Network",
+          "name": ["Paxos Digital Singapore", "Global Dollar Network"],
           "url": "https://globaldollar.com/about-usdg",
           "socials": { "x": "global_dollar" }
         }
@@ -48,7 +48,7 @@
         "decimals": 6,
         "icon": "https://424565.fs1.hubspotusercontent-na1.net/hubfs/424565/PYUSDLOGO.png",
         "issuer": {
-          "name": "Paxos Trust Company / PayPal",
+          "name": ["Paxos Trust Company", "PayPal"],
           "url": "https://www.paxos.com/pyusd",
           "socials": { "x": "PayPal" }
         }
@@ -61,7 +61,7 @@
         "decimals": 6,
         "icon": "https://raw.githubusercontent.com/worldliberty/usd1-metadata/refs/heads/main/logo.png",
         "issuer": {
-          "name": "World Liberty Financial / BitGo",
+          "name": ["World Liberty Financial", "BitGo"],
           "url": "https://worldlibertyfinancial.com/usd1",
           "socials": { "x": "worldlibertyfi" }
         }
@@ -79,7 +79,7 @@
         "decimals": 6,
         "icon": "https://6778953.fs1.hubspotusercontent-na1.net/hubfs/6778953/Brand/EURC/EURC-icon_128x128.png",
         "issuer": {
-          "name": "Circle",
+          "name": ["Circle"],
           "url": "https://www.circle.com/eurc",
           "socials": { "x": "circle" }
         }
@@ -91,7 +91,7 @@
         "decimals": 9,
         "icon": "https://vnx.li/wp-content/uploads/2025/04/VEUR-256x256-1.png",
         "issuer": {
-          "name": "VNX Commodities AG",
+          "name": ["VNX Commodities AG"],
           "url": "https://vnx.li/",
           "socials": { "x": "VNX_Platform" }
         }
@@ -108,7 +108,7 @@
         "decimals": 6,
         "icon": "https://assets.coingecko.com/coins/images/33263/standard/AUDD-Logo-Blue_512.png",
         "issuer": {
-          "name": "AUDC Pty Ltd / AUDD Digital",
+          "name": ["AUDC"],
           "url": "https://www.audd.digital/",
           "socials": { "x": "AUDD_digital" }
         }
@@ -124,7 +124,7 @@
         "decimals": 6,
         "icon": "https://transferotokensconfig.blob.core.windows.net/stablesimages/BRZ/ico/ico_BRZ_750x750.png",
         "issuer": {
-          "name": "Transfero",
+          "name": ["Transfero"],
           "url": "https://transfero.com/stablecoins/brz/",
           "socials": { "x": "BrzToken" }
         }
@@ -140,7 +140,7 @@
         "decimals": 9,
         "icon": "https://vnx.li/wp-content/uploads/2025/04/VCHF-256x256-1.png",
         "issuer": {
-          "name": "VNX Commodities AG",
+          "name": ["VNX Commodities AG"],
           "url": "https://vnx.li/",
           "socials": { "x": "VNX_Platform" }
         }
@@ -156,7 +156,7 @@
         "decimals": 9,
         "icon": "https://raw.githubusercontent.com/superset-finance/token-metadata/main/tGBP/logo.png",
         "issuer": {
-          "name": "Tokenised GBP / BCP Technologies",
+          "name": ["Tokenised GBP", "BCP Technologies"],
           "url": "https://www.tokenisedgbp.com/",
           "socials": { "x": "tokenGBP" }
         }
@@ -168,7 +168,7 @@
         "decimals": 9,
         "icon": "https://vnx.li/wp-content/uploads/2025/04/VGBP-256x256-1.png",
         "issuer": {
-          "name": "VNX Commodities AG",
+          "name": ["VNX Commodities AG"],
           "url": "https://vnx.li/",
           "socials": { "x": "VNX_Platform" }
         }
@@ -185,7 +185,7 @@
         "decimals": 6,
         "icon": "https://stablecoin.z.com/assets/images/token/icon_gyen_300_300.png",
         "issuer": {
-          "name": "GMO-Z.com Trust Company",
+          "name": ["GMO-Z.com Trust Company"],
           "url": "https://stablecoin.z.com/lp/solana/",
           "socials": { "x": "GMOTrust" }
         }
@@ -198,10 +198,11 @@
         "symbol": "MXNe",
         "name": "Real MXN",
         "mint": "6zYgzrT7X2wi9a9NeMtUvUWLLmf2a8vBsbYkocYdB9wa",
+        "mintSourceUrl": "https://brale.xyz/stablecoins/MXNe",
         "decimals": 9,
         "icon": "https://brale.xyz/assets/stablecoins/mxne-logo.png",
         "issuer": {
-          "name": "Brale, in partnership with Etherfuse",
+          "name": ["Brale", "Etherfuse"],
           "url": "https://brale.xyz/stablecoins/MXNe",
           "socials": { "x": "etherfuse" }
         }
@@ -218,7 +219,7 @@
         "decimals": 6,
         "icon": "https://black-elaborate-wildcat-667.mypinata.cloud/ipfs/bafkreihl3tm6zdwmcyiaurafzfmblu5olk7ozpelftop7ydbvaalm2vooi",
         "issuer": {
-          "name": "WrappedCBDC Ltd / cNGN",
+          "name": ["WrappedCBDC Ltd"],
           "url": "https://cngn.co/",
           "socials": { "x": "cngn_co" }
         }
@@ -235,7 +236,7 @@
         "decimals": 6,
         "icon": "https://assets.coingecko.com/coins/images/12832/standard/xsgd.png",
         "issuer": {
-          "name": "StraitsX",
+          "name": ["StraitsX"],
           "url": "https://www.straitsx.com/xsgd",
           "socials": { "x": "straitsx" }
         }
@@ -252,7 +253,7 @@
         "decimals": 6,
         "icon": "https://raw.githubusercontent.com/venox-digital-assets/zarp.contract/main/public/zarp_coin.png",
         "issuer": {
-          "name": "ZARP Stablecoin (Pty) Ltd",
+          "name": ["ZARP Stablecoin (Pty) Ltd"],
           "url": "https://www.zarpstablecoin.com/",
           "socials": { "x": "ZARP_Stablecoin" }
         }

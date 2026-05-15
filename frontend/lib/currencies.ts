@@ -3,7 +3,7 @@ import data from "./currencies.json";
 
 export type IsoCurrencyCode = keyof typeof data;
 export type Issuer = {
-  name: string;
+  name: string[];
   url: string;
   socials?: { x?: string };
 };
