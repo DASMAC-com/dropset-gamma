@@ -32,11 +32,17 @@ export function UrlSync() {
   // Always write current selection to URL while on /swap, including on first
   // arrival with defaults, after any picker change, and after a router-level
   // navigation that strips our params (e.g. clicking the favicon Link, which
-  // points at bare /swap).
+  // points at bare /swap). Reading from searchParams in the body — rather than
+  // window.location.search — ties this effect to Next.js' router updates so it
+  // re-fires when nav changes the params underneath us.
   useEffect(() => {
     if (pathname !== "/swap") return;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("from") === fromSym && params.get("to") === toSym) return;
+    if (
+      searchParams.get("from") === fromSym &&
+      searchParams.get("to") === toSym
+    )
+      return;
+    const params = new URLSearchParams(searchParams.toString());
     params.set("from", fromSym);
     params.set("to", toSym);
     const next = `${window.location.pathname}?${params.toString()}${window.location.hash}`;
