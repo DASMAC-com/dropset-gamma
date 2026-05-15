@@ -4,7 +4,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { CopyButton } from "@/components/CopyButton";
 import { ExternalLink, HelpCircle, Search, X } from "@/components/icons";
-import { useAppEvent } from "@/lib/events";
 import {
   CURRENCIES,
   currencyFlag,
@@ -14,6 +13,7 @@ import {
   type Stablecoin,
   SUPPORTED,
 } from "@/lib/currencies";
+import { useAppEvent } from "@/lib/events";
 import { explorerAddressUrl } from "@/lib/explorer";
 import { type Side, useSwapStore } from "@/lib/store";
 
@@ -190,7 +190,7 @@ function StablecoinRow({
   return (
     <tr
       id={s.symbol.toLowerCase()}
-      className={`scroll-mt-24 border-border border-t ${striped ? "bg-muted/30" : ""}`}
+      className={`scroll-mt-24 border-border border-t ${striped ? "bg-muted/70" : ""}`}
     >
       <td className="px-3 py-2 align-top">
         <div className="flex items-center gap-2">
@@ -272,7 +272,7 @@ function StablecoinRow({
           {s.issuer.name.map((n, i) => (
             <span
               key={n}
-              className={i % 2 === 0 ? "text-foreground" : "text-muted-fg"}
+              className={i === 0 ? "text-muted-fg" : "text-foreground"}
             >
               {n}
             </span>

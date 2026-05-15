@@ -47,24 +47,25 @@ export function PersistedGlobe() {
   }, [onSwap]);
 
   const parked = lastRectRef.current ?? FALLBACK_RECT;
-  const style: React.CSSProperties = onSwap && rect
-    ? {
-        position: "fixed",
-        top: rect.top,
-        left: rect.left,
-        width: rect.width,
-        height: rect.height,
-        zIndex: 1,
-      }
-    : {
-        position: "fixed",
-        top: 0,
-        left: -99999,
-        width: parked.width,
-        height: parked.height,
-        pointerEvents: "none",
-        zIndex: -1,
-      };
+  const style: React.CSSProperties =
+    onSwap && rect
+      ? {
+          position: "fixed",
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height,
+          zIndex: 1,
+        }
+      : {
+          position: "fixed",
+          top: 0,
+          left: -99999,
+          width: parked.width,
+          height: parked.height,
+          pointerEvents: "none",
+          zIndex: -1,
+        };
 
   return (
     <div aria-hidden={!onSwap} style={style}>

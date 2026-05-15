@@ -44,9 +44,7 @@ export const currencyStats = (): {
   total: number;
   missing: number;
 } => {
-  const represented = SUPPORTED.filter((c) =>
-    ALL_CURRENCY_CODES.has(c),
-  ).length;
+  const represented = SUPPORTED.filter((c) => ALL_CURRENCY_CODES.has(c)).length;
   const total = ALL_CURRENCY_CODES.size;
   return { represented, total, missing: total - represented };
 };
