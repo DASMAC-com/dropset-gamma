@@ -24,6 +24,7 @@ export type AppEvents = {
   zoomIn: undefined;
   zoomOut: undefined;
   pan: PanDirection;
+  focusCurrenciesSearch: undefined;
 };
 
 type Handler<K extends keyof AppEvents> = (payload: AppEvents[K]) => void;

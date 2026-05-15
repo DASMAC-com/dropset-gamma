@@ -1,7 +1,5 @@
 import { Suspense } from "react";
 import { GlobePanel } from "@/components/GlobePanel";
-import { KeyboardShortcuts } from "@/components/KeyboardShortcuts";
-import { ShortcutsHelp } from "@/components/ShortcutsHelp";
 import { SwapPanel } from "@/components/SwapPanel";
 import { UrlSync } from "@/components/UrlSync";
 
@@ -11,8 +9,6 @@ export default function SwapPage() {
       <Suspense fallback={null}>
         <UrlSync />
       </Suspense>
-      <KeyboardShortcuts />
-      <ShortcutsHelp />
       <SwapPanel />
       <GlobePanel />
     </div>

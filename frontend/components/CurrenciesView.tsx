@@ -1,9 +1,10 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { CopyButton } from "@/components/CopyButton";
 import { ExternalLink, HelpCircle, Search, X } from "@/components/icons";
+import { useAppEvent } from "@/lib/events";
 import {
   CURRENCIES,
   currencyFlag,
@@ -14,8 +15,9 @@ import {
   SUPPORTED,
 } from "@/lib/currencies";
 import { explorerAddressUrl } from "@/lib/explorer";
+import { type Side, useSwapStore } from "@/lib/store";
 
-const COLSPAN = 5;
+const COLSPAN = 6;
 
 // Cache of dominant color (RGB triplet) computed from a flag emoji rendered to
 // a canvas. Module-level so it persists across re-renders / search filters.
@@ -121,11 +123,67 @@ function CurrencyHeaderRow({ code }: { code: IsoCurrencyCode }) {
   );
 }
 
+function SwapPickerCell({
+  code,
+  symbol,
+}: {
+  code: IsoCurrencyCode;
+  symbol: string;
+}) {
+  const router = useRouter();
+  const fromCurrency = useSwapStore((s) => s.from.currency);
+  const fromStablecoin = useSwapStore((s) => s.from.stablecoin);
+  const toCurrency = useSwapStore((s) => s.to.currency);
+  const toStablecoin = useSwapStore((s) => s.to.stablecoin);
+  const setToken = useSwapStore((s) => s.setToken);
+  const swapSides = useSwapStore((s) => s.swapSides);
+
+  const isFrom = code === fromCurrency && symbol === fromStablecoin;
+  const isTo = code === toCurrency && symbol === toStablecoin;
+
+  const pick = (side: Side) => {
+    const alreadyOnSide = side === "from" ? isFrom : isTo;
+    const alreadyOnOther = side === "from" ? isTo : isFrom;
+    if (alreadyOnOther) swapSides();
+    else if (!alreadyOnSide) setToken(side, code, symbol);
+    router.push("/swap");
+  };
+
+  const btn = (side: Side, label: string, active: boolean) => (
+    <button
+      type="button"
+      onClick={() => pick(side)}
+      aria-pressed={active}
+      title={
+        active
+          ? `${symbol} is already your ${label.toLowerCase()} token`
+          : `Use ${symbol} as your ${label.toLowerCase()} token`
+      }
+      className={
+        active
+          ? "rounded border border-accent bg-accent/10 px-2 py-1 font-medium text-accent text-xs"
+          : "rounded border border-border bg-background px-2 py-1 font-medium text-muted-fg text-xs transition-colors hover:border-accent hover:text-accent"
+      }
+    >
+      {label}
+    </button>
+  );
+
+  return (
+    <div className="flex items-center gap-1">
+      {btn("from", "From", isFrom)}
+      {btn("to", "To", isTo)}
+    </div>
+  );
+}
+
 function StablecoinRow({
+  code,
   s,
   rowIndex,
   groupSize,
 }: {
+  code: IsoCurrencyCode;
   s: Stablecoin;
   rowIndex: number;
   groupSize: number;
@@ -156,13 +214,10 @@ function StablecoinRow({
           href={s.issuer.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-muted-fg hover:text-accent"
+          className="inline-flex items-start gap-1 text-muted-fg hover:text-accent"
         >
-          {s.name}
-          <ExternalLink
-            size={10}
-            className="ml-1 inline-block shrink-0 align-text-bottom"
-          />
+          <span>{s.name}</span>
+          <ExternalLink size={10} className="mt-1.5 shrink-0" />
         </a>
       </td>
       <td className="px-3 py-2 align-top">
@@ -223,6 +278,9 @@ function StablecoinRow({
           ))}
         </div>
       </td>
+      <td className="px-3 py-2 align-top">
+        <SwapPickerCell code={code} symbol={s.symbol} />
+      </td>
     </tr>
   );
 }
@@ -230,6 +288,12 @@ function StablecoinRow({
 function CurrenciesInner() {
   const searchParams = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useAppEvent("focusCurrenciesSearch", () => {
+    inputRef.current?.focus();
+    inputRef.current?.select();
+  });
 
   const q = query.trim().toLowerCase();
   const grouped = useMemo(
@@ -251,9 +315,16 @@ function CurrenciesInner() {
         <div className="flex h-9 w-56 items-center gap-2 rounded-md border border-border bg-muted px-3">
           <Search size={14} className="shrink-0 text-muted-fg" />
           <input
+            ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                e.preventDefault();
+                inputRef.current?.blur();
+              }
+            }}
             placeholder="Search currencies…"
             className="min-w-0 flex-1 bg-transparent text-foreground text-sm outline-none placeholder:text-muted-fg"
           />
@@ -299,6 +370,9 @@ function CurrenciesInner() {
               <th className="sticky top-14 z-20 bg-muted px-3 py-2 font-medium">
                 Issuer(s)
               </th>
+              <th className="sticky top-14 z-20 bg-muted px-3 py-2 font-medium">
+                Swap
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -317,6 +391,7 @@ function CurrenciesInner() {
                 ...stables.map((s, i) => (
                   <StablecoinRow
                     key={s.symbol}
+                    code={code}
                     s={s}
                     rowIndex={i}
                     groupSize={stables.length}

@@ -51,7 +51,7 @@ export function Header() {
           type="button"
           onClick={() => emit("toggleHelp")}
           aria-label="Show keyboard shortcuts"
-          title="Keyboard shortcuts (/)"
+          title="Keyboard shortcuts (?)"
           className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground hover:bg-muted"
         >
           <Keyboard size={18} />
