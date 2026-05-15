@@ -11,7 +11,7 @@ export function Header() {
     <header className="sticky top-0 z-50 border-border border-b bg-background">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-6">
         <Link
-          href="/"
+          href="/swap"
           aria-label="Dropset"
           className="mr-4 flex shrink-0 items-center no-underline"
         >

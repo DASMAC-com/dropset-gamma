@@ -7,15 +7,7 @@ import { emit } from "./events";
 // case-insensitive key to a side effect. Add new shortcuts here; nothing else
 // needs to change.
 export type ShortcutSpec = {
-  // The KeyboardEvent.key value to match (lowercased). For arrow keys this is
-  // `ArrowUp` / `ArrowDown` etc.; the help dialog uses `displayKey` when
-  // present so the listing can show a glyph instead of a verbose name.
   key: string;
-  // When true, requires Shift to be held. When false/undefined, requires Shift
-  // to NOT be held — so a shifted entry and an unshifted entry for the same
-  // letter can coexist without colliding.
-  shift?: boolean;
-  displayKey?: string;
   description: string;
   run: () => void;
 };
@@ -32,9 +24,7 @@ export const SHORTCUTS: ShortcutSpec[] = [
     run: () => emit("openPicker", "from"),
   },
   {
-    key: "f",
-    shift: true,
-    displayKey: "⇧F",
+    key: "a",
     description: "Focus the From amount input",
     run: () => emit("focusFromAmount"),
   },
@@ -131,9 +121,7 @@ export function useKeyboardShortcuts(): void {
         if (/[0-9.]/.test(e.key)) return;
       }
       const k = e.key.toLowerCase();
-      const spec = SHORTCUTS.find(
-        (s) => s.key.toLowerCase() === k && (s.shift ?? false) === e.shiftKey,
-      );
+      const spec = SHORTCUTS.find((s) => s.key === k);
       if (!spec) {
         // In passthrough mode, swallow stray characters so they don't land in
         // the amount field even when they match no shortcut.

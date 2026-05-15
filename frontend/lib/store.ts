@@ -37,11 +37,24 @@ type Store = {
   swapSides: () => void;
 };
 
+export const DEFAULT_FROM_CURRENCY: IsoCurrencyCode = "USD";
+export const DEFAULT_FROM_STABLECOIN = "USDC";
+export const DEFAULT_TO_CURRENCY: IsoCurrencyCode = "EUR";
+export const DEFAULT_TO_STABLECOIN = "EURC";
+
 export const useSwapStore = create<Store>((set) => ({
-  from: { currency: "USD", stablecoin: "USDC", cca2: anchorFor("USD") },
-  to: { currency: "EUR", stablecoin: "EURC", cca2: anchorFor("EUR") },
+  from: {
+    currency: DEFAULT_FROM_CURRENCY,
+    stablecoin: DEFAULT_FROM_STABLECOIN,
+    cca2: anchorFor(DEFAULT_FROM_CURRENCY),
+  },
+  to: {
+    currency: DEFAULT_TO_CURRENCY,
+    stablecoin: DEFAULT_TO_STABLECOIN,
+    cca2: anchorFor(DEFAULT_TO_CURRENCY),
+  },
   amount: "",
-  slippage: { mode: "fixed", percent: 0.3 },
+  slippage: { mode: "auto" },
   activeSide: "from",
 
   setActiveSide: (side) => set({ activeSide: side }),
